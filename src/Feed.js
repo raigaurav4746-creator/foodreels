@@ -7,6 +7,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [likes, setLikes] = useState({});
 
   const categories = ['All', 'Burger', 'Pizza', 'Chicken', 'Pasta', 'Sandwich'];
 
@@ -37,6 +38,13 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
     }
     setFiltered(result);
   }, [search, activeCategory, reels]);
+
+  const handleLike = (id) => {
+    setLikes(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   return (
     <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
@@ -198,6 +206,24 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
                 borderRadius: '20px',
                 fontSize: '12px'
               }}>{reel.restaurant}</div>
+
+              <button
+                onClick={() => handleLike(reel.id)}
+                style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '16px',
+                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: '6px 12px',
+                  cursor: 'pointer',
+                  color: likes[reel.id] ? '#ff4d4d' : 'white',
+                  fontSize: '16px'
+                }}>
+                {likes[reel.id] ? 'Liked' : 'Like'}
+              </button>
+
               <h2 style={{
                 color: 'white',
                 fontSize: '26px',
