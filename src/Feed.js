@@ -8,6 +8,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [likes, setLikes] = useState({});
+  const [ratings, setRatings] = useState({});
 
   const categories = ['All', 'Burger', 'Pizza', 'Chicken', 'Pasta', 'Sandwich'];
 
@@ -40,10 +41,11 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
   }, [search, activeCategory, reels]);
 
   const handleLike = (id) => {
-    setLikes(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
+    setLikes(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleRating = (id, star) => {
+    setRatings(prev => ({ ...prev, [id]: star }));
   };
 
   return (
@@ -248,6 +250,28 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
               <div>
                 <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{reel.dish}</p>
                 <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>{reel.restaurant}</p>
+                <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      onClick={() => handleRating(reel.id, star)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '18px',
+                        color: ratings[reel.id] >= star ? '#f39c12' : '#444',
+                        padding: '0'
+                      }}>
+                      {ratings[reel.id] >= star ? 'S' : 'S'}
+                    </button>
+                  ))}
+                  {ratings[reel.id] && (
+                    <span style={{ color: '#888', fontSize: '12px', marginLeft: '4px', alignSelf: 'center' }}>
+                      {ratings[reel.id]}/5
+                    </span>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => {
