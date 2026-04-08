@@ -48,8 +48,12 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
     setRatings(prev => ({ ...prev, [id]: star }));
   };
 
+  const starSymbol = String.fromCharCode(9733);
+  const heartFilled = 'Liked';
+  const heartEmpty = 'Like';
+
   return (
-    <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
+    <div className="fade-in" style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
 
       <div style={{
         position: 'sticky',
@@ -89,7 +93,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
               cursor: 'pointer',
               fontSize: '13px',
               fontWeight: 'bold'
-            }}>Cart {cartCount > 0 ? `(${cartCount})` : ''}</button>
+            }}>Cart {cartCount > 0 ? '(' + cartCount + ')' : ''}</button>
             <button onClick={onProfile} style={{
               backgroundColor: '#1a1a1a',
               color: 'white',
@@ -156,7 +160,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
       </div>
 
       {ordered && (
-        <div style={{
+        <div className="slide-in" style={{
           backgroundColor: '#1a2a1a',
           border: '1px solid #2ecc71',
           color: '#2ecc71',
@@ -173,24 +177,33 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
 
         {loading && (
           <div style={{ textAlign: 'center', marginTop: '100px' }}>
+            <div className="spin" style={{
+              width: '40px',
+              height: '40px',
+              border: '4px solid #333',
+              borderTop: '4px solid #e85d04',
+              borderRadius: '50%',
+              margin: '0 auto 16px'
+            }}></div>
             <p style={{ color: '#888', fontSize: '16px' }}>Loading reels...</p>
           </div>
         )}
 
         {!loading && filtered.length === 0 && (
-          <div style={{ textAlign: 'center', marginTop: '100px' }}>
+          <div className="fade-in" style={{ textAlign: 'center', marginTop: '100px' }}>
             <p style={{ color: '#888', fontSize: '16px' }}>No results found!</p>
             <p style={{ color: '#555', fontSize: '14px' }}>Try a different search</p>
           </div>
         )}
 
-        {filtered.map((reel) => (
-          <div key={reel.id} style={{
+        {filtered.map((reel, index) => (
+          <div key={reel.id} className="reel-card" style={{
             borderRadius: '24px',
             marginBottom: '16px',
             overflow: 'hidden',
             backgroundColor: '#1a1a1a',
-            border: '1px solid #2a2a2a'
+            border: '1px solid #2a2a2a',
+            animationDelay: index * 0.1 + 's'
           }}>
             <div style={{
               backgroundColor: reel.color,
@@ -215,15 +228,17 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
                   position: 'absolute',
                   top: '12px',
                   right: '16px',
-                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  backgroundColor: likes[reel.id] ? 'rgba(255,77,77,0.3)' : 'rgba(0,0,0,0.3)',
                   border: 'none',
                   borderRadius: '20px',
-                  padding: '6px 12px',
+                  padding: '6px 14px',
                   cursor: 'pointer',
                   color: likes[reel.id] ? '#ff4d4d' : 'white',
-                  fontSize: '16px'
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.2s ease'
                 }}>
-                {likes[reel.id] ? 'Liked' : 'Like'}
+                {likes[reel.id] ? heartFilled : heartEmpty}
               </button>
 
               <h2 style={{
@@ -259,11 +274,12 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        fontSize: '18px',
+                        fontSize: '20px',
                         color: ratings[reel.id] >= star ? '#f39c12' : '#444',
-                        padding: '0'
+                        padding: '0',
+                        transition: 'transform 0.1s ease, color 0.1s ease'
                       }}>
-                      {ratings[reel.id] >= star ? 'S' : 'S'}
+                      {starSymbol}
                     </button>
                   ))}
                   {ratings[reel.id] && (

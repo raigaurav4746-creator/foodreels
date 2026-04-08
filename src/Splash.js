@@ -8,7 +8,7 @@ function Splash({ onDone }) {
   }, []);
 
   return (
-    <div style={{
+    <div className="fade-in" style={{
       backgroundColor: '#0a0a0a',
       minHeight: '100vh',
       display: 'flex',
@@ -16,7 +16,7 @@ function Splash({ onDone }) {
       justifyContent: 'center',
       alignItems: 'center'
     }}>
-      <div style={{
+      <div className="bounce-in" style={{
         width: '100px',
         height: '100px',
         backgroundColor: '#e85d04',
@@ -43,29 +43,13 @@ function Splash({ onDone }) {
         margin: '0 0 48px'
       }}>Discover food. Get hungry. Order now.</p>
 
-      <div style={{
-        display: 'flex',
-        gap: '8px'
-      }}>
-        <div style={{
-          width: '8px',
-          height: '8px',
-          backgroundColor: '#e85d04',
-          borderRadius: '50%'
-        }}></div>
-        <div style={{
-          width: '8px',
-          height: '8px',
-          backgroundColor: '#444',
-          borderRadius: '50%'
-        }}></div>
-        <div style={{
-          width: '8px',
-          height: '8px',
-          backgroundColor: '#444',
-          borderRadius: '50%'
-        }}></div>
-      </div>
+      <div className="spin" style={{
+        width: '24px',
+        height: '24px',
+        border: '3px solid #333',
+        borderTop: '3px solid #e85d04',
+        borderRadius: '50%'
+      }}></div>
     </div>
   );
 }

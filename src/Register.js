@@ -35,7 +35,7 @@ function Register({ onSwitch }) {
   };
 
   return (
-    <div style={{
+    <div className="fade-in" style={{
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -51,7 +51,7 @@ function Register({ onSwitch }) {
         maxWidth: '360px',
         border: '1px solid #2a2a2a'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div className="bounce-in" style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
             width: '60px',
             height: '60px',
@@ -76,7 +76,7 @@ function Register({ onSwitch }) {
         </div>
 
         {message && (
-          <div style={{ backgroundColor: message.includes('created') ? '#1a2a1a' : '#2a1a1a', border: `1px solid ${message.includes('created') ? '#2ecc71' : '#e85d04'}`, borderRadius: '10px', padding: '12px', marginBottom: '16px', color: message.includes('created') ? '#2ecc71' : '#e85d04', fontSize: '14px', textAlign: 'center' }}>{message}</div>
+          <div className="fade-in" style={{ backgroundColor: message.includes('created') ? '#1a2a1a' : '#2a1a1a', border: `1px solid ${message.includes('created') ? '#2ecc71' : '#e85d04'}`, borderRadius: '10px', padding: '12px', marginBottom: '16px', color: message.includes('created') ? '#2ecc71' : '#e85d04', fontSize: '14px', textAlign: 'center' }}>{message}</div>
         )}
 
         <input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} style={{ width: '100%', padding: '14px', marginBottom: '12px', borderRadius: '10px', border: '1px solid #2a2a2a', backgroundColor: '#2a2a2a', color: 'white', fontSize: '15px', boxSizing: 'border-box', outline: 'none' }} />
