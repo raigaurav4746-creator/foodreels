@@ -8,7 +8,8 @@ function Profile({ onLogout, userEmail, onBack }) {
     fetch('https://foodreels-backend.onrender.com/orders')
       .then(res => res.json())
       .then(data => {
-        setOrders(data);
+        const myOrders = data.filter(order => order.customer === userEmail);
+        setOrders(myOrders);
         setLoading(false);
       })
       .catch(err => {
@@ -20,7 +21,7 @@ function Profile({ onLogout, userEmail, onBack }) {
   const totalSpent = orders.reduce((sum, order) => sum + order.price, 0);
 
   return (
-    <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
+    <div className="fade-in" style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
 
       <div style={{
         position: 'sticky',
@@ -61,7 +62,7 @@ function Profile({ onLogout, userEmail, onBack }) {
 
       <div style={{ padding: '20px' }}>
 
-        <div style={{
+        <div className="bounce-in" style={{
           backgroundColor: '#1a1a1a',
           border: '1px solid #2a2a2a',
           borderRadius: '20px',
@@ -81,17 +82,31 @@ function Profile({ onLogout, userEmail, onBack }) {
             fontSize: '32px',
             color: 'white',
             fontWeight: 'bold'
-          }}>U</div>
+          }}>{userEmail ? userEmail[0].toUpperCase() : 'U'}</div>
           <h3 style={{ color: 'white', margin: 0, fontSize: '20px' }}>My Account</h3>
           <p style={{ color: '#888', margin: '8px 0 0', fontSize: '14px' }}>{userEmail}</p>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-          <div style={{ flex: 1, backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+          <div style={{
+            flex: 1,
+            backgroundColor: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+            borderRadius: '16px',
+            padding: '20px',
+            textAlign: 'center'
+          }}>
             <h3 style={{ color: '#e85d04', margin: 0, fontSize: '28px' }}>{orders.length}</h3>
-            <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>Total Orders</p>
+            <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>My Orders</p>
           </div>
-          <div style={{ flex: 1, backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+          <div style={{
+            flex: 1,
+            backgroundColor: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+            borderRadius: '16px',
+            padding: '20px',
+            textAlign: 'center'
+          }}>
             <h3 style={{ color: '#2ecc71', margin: 0, fontSize: '24px' }}>Rs.{totalSpent}</h3>
             <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>Total Spent</p>
           </div>
@@ -99,17 +114,43 @@ function Profile({ onLogout, userEmail, onBack }) {
 
         <h3 style={{ color: 'white', marginBottom: '16px', fontSize: '16px' }}>Order History</h3>
 
-        {loading && <p style={{ color: '#888', textAlign: 'center' }}>Loading orders...</p>}
+        {loading && (
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <div className="spin" style={{
+              width: '30px',
+              height: '30px',
+              border: '3px solid #333',
+              borderTop: '3px solid #e85d04',
+              borderRadius: '50%',
+              margin: '0 auto'
+            }}></div>
+          </div>
+        )}
 
         {!loading && orders.length === 0 && (
-          <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '16px', padding: '40px', textAlign: 'center' }}>
+          <div style={{
+            backgroundColor: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+            borderRadius: '16px',
+            padding: '40px',
+            textAlign: 'center'
+          }}>
             <p style={{ color: '#888', margin: 0 }}>No orders yet!</p>
             <p style={{ color: '#555', margin: '8px 0 0', fontSize: '14px' }}>Start ordering from the Feed</p>
           </div>
         )}
 
-        {orders.map((order) => (
-          <div key={order.id} style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {orders.map((order, index) => (
+          <div key={index} className="slide-in" style={{
+            backgroundColor: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '10px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
             <div>
               <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{order.dish}</p>
               <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>{order.status}</p>

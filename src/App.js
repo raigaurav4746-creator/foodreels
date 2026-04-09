@@ -22,7 +22,7 @@ function App() {
 
   const addToCart = (reel) => {
     setCart([...cart, reel]);
-    addNotification('Added to cart!', `${reel.dish} added to your cart`, 'cart');
+    addNotification('Added to cart!', reel.dish + ' added to your cart', 'cart');
   };
 
   const removeFromCart = (index) => {
@@ -31,17 +31,22 @@ function App() {
   };
 
   const checkout = async () => {
+    if (!userEmail) {
+      alert('Please login first!');
+      return;
+    }
     try {
       for (const item of cart) {
         await fetch('https://foodreels-backend.onrender.com/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dish: item.dish, price: item.price, customer: userEmail || 'Test User' })
+          body: JSON.stringify({ dish: item.dish, price: item.price, customer: userEmail })
         });
       }
-      addNotification('Order placed!', `Your order of ${cart.length} items has been placed`, 'order');
+      addNotification('Order placed!', 'Your order of ' + cart.length + ' items has been placed', 'order');
       setCart([]);
       setPage('feed');
+      alert('Order placed successfully!');
     } catch (error) {
       alert('Error placing order!');
     }
