@@ -8,6 +8,7 @@ import Cart from './Cart';
 import Splash from './Splash';
 import Notifications from './Notifications';
 import RestaurantPage from './RestaurantPage';
+import OrderTracking from './OrderTracking';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -47,7 +48,7 @@ function App() {
       }
       addNotification('Order placed!', 'Your order of ' + cart.length + ' items has been placed', 'order');
       setCart([]);
-      setPage('feed');
+      setPage('tracking');
       alert('Order placed successfully!');
     } catch (error) {
       alert('Error placing order!');
@@ -67,6 +68,7 @@ function App() {
       {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} />}
       {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} />}
       {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} />}
+      {page === 'tracking' && <OrderTracking onBack={() => setPage('feed')} userEmail={userEmail} />}
       {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
 
       {isLoggedIn && role === 'user' && (
@@ -127,6 +129,21 @@ function App() {
                 justifyContent: 'center'
               }}>{cart.length}</div>
             )}
+          </button>
+
+          <button onClick={() => setPage('tracking')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'tracking' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '12px',
+            fontWeight: page === 'tracking' ? 'bold' : 'normal'
+          }}>
+            <div style={{ fontSize: '20px' }}>Orders</div>
           </button>
 
           <button onClick={() => setPage('notifications')} style={{
