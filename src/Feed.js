@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
+function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant }) {
   const [reels, setReels] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [ordered, setOrdered] = useState(null);
@@ -49,8 +49,6 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
   };
 
   const starSymbol = String.fromCharCode(9733);
-  const heartFilled = 'Liked';
-  const heartEmpty = 'Like';
 
   return (
     <div className="fade-in" style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
@@ -211,16 +209,20 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
               textAlign: 'center',
               position: 'relative'
             }}>
-              <div style={{
-                position: 'absolute',
-                top: '16px',
-                left: '16px',
-                backgroundColor: 'rgba(0,0,0,0.3)',
-                color: 'white',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '12px'
-              }}>{reel.restaurant}</div>
+              <div
+                onClick={() => onRestaurant(reel.restaurant)}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  left: '16px',
+                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  color: 'white',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}>{reel.restaurant}</div>
 
               <button
                 onClick={() => handleLike(reel.id)}
@@ -238,7 +240,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart }) {
                   fontWeight: 'bold',
                   transition: 'all 0.2s ease'
                 }}>
-                {likes[reel.id] ? heartFilled : heartEmpty}
+                {likes[reel.id] ? 'Liked' : 'Like'}
               </button>
 
               <h2 style={{

@@ -7,6 +7,7 @@ import Profile from './Profile';
 import Cart from './Cart';
 import Splash from './Splash';
 import Notifications from './Notifications';
+import RestaurantPage from './RestaurantPage';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -14,6 +15,7 @@ function App() {
   const [cart, setCart] = useState([]);
   const [role, setRole] = useState('user');
   const [notifications, setNotifications] = useState([]);
+  const [selectedRestaurant, setSelectedRestaurant] = useState('');
 
   const addNotification = (title, message, type) => {
     const time = new Date().toLocaleTimeString();
@@ -60,10 +62,11 @@ function App() {
       {page === 'splash' && <Splash onDone={() => setPage('login')} />}
       {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} />}
       {page === 'register' && <Register onSwitch={() => setPage('login')} />}
-      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} />}
+      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} />}
       {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} />}
       {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} />}
       {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} />}
+      {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} />}
       {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
 
       {isLoggedIn && role === 'user' && (
