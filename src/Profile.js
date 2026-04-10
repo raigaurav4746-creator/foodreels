@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 function Profile({ onLogout, userEmail, onBack }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [shareMessage, setShareMessage] = useState('');
 
   useEffect(() => {
     fetch('https://foodreels-backend.onrender.com/orders')
@@ -19,6 +20,20 @@ function Profile({ onLogout, userEmail, onBack }) {
   }, []);
 
   const totalSpent = orders.reduce((sum, order) => sum + order.price, 0);
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'FoodReels',
+        text: 'Discover food. Get hungry. Order now.',
+        url: 'https://foodreels-numa.vercel.app'
+      });
+    } else {
+      navigator.clipboard.writeText('https://foodreels-numa.vercel.app');
+      setShareMessage('Link copied to clipboard!');
+      setTimeout(() => setShareMessage(''), 3000);
+    }
+  };
 
   return (
     <div className="fade-in" style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
@@ -81,7 +96,8 @@ function Profile({ onLogout, userEmail, onBack }) {
             margin: '0 auto 16px',
             fontSize: '32px',
             color: 'white',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            boxShadow: '0 8px 24px rgba(232, 93, 4, 0.3)'
           }}>{userEmail ? userEmail[0].toUpperCase() : 'U'}</div>
           <h3 style={{ color: 'white', margin: 0, fontSize: '20px' }}>My Account</h3>
           <p style={{ color: '#888', margin: '8px 0 0', fontSize: '14px' }}>{userEmail}</p>
@@ -110,6 +126,44 @@ function Profile({ onLogout, userEmail, onBack }) {
             <h3 style={{ color: '#2ecc71', margin: 0, fontSize: '24px' }}>Rs.{totalSpent}</h3>
             <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>Total Spent</p>
           </div>
+        </div>
+
+        {shareMessage && (
+          <div className="fade-in" style={{
+            backgroundColor: '#1a2a1a',
+            border: '1px solid #2ecc71',
+            borderRadius: '12px',
+            padding: '12px',
+            marginBottom: '16px',
+            color: '#2ecc71',
+            textAlign: 'center',
+            fontSize: '14px',
+            fontWeight: 'bold'
+          }}>{shareMessage}</div>
+        )}
+
+        <div style={{
+          backgroundColor: '#1a1a1a',
+          border: '1px solid #2a2a2a',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '24px'
+        }}>
+          <h3 style={{ color: 'white', margin: '0 0 12px', fontSize: '16px' }}>Share FoodReels</h3>
+          <p style={{ color: '#888', margin: '0 0 16px', fontSize: '14px' }}>Share this app with your friends!</p>
+          <button
+            onClick={handleShare}
+            style={{
+              width: '100%',
+              padding: '14px',
+              backgroundColor: '#e85d04',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '15px',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}>Share FoodReels App</button>
         </div>
 
         <h3 style={{ color: 'white', marginBottom: '16px', fontSize: '16px' }}>Order History</h3>
