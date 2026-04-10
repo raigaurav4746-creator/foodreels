@@ -9,6 +9,7 @@ import Splash from './Splash';
 import Notifications from './Notifications';
 import RestaurantPage from './RestaurantPage';
 import OrderTracking from './OrderTracking';
+import Favorites from './Favorites';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -17,6 +18,7 @@ function App() {
   const [role, setRole] = useState('user');
   const [notifications, setNotifications] = useState([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState('');
+  const [favorites, setFavorites] = useState([]);
 
   const addNotification = (title, message, type) => {
     const time = new Date().toLocaleTimeString();
@@ -33,7 +35,21 @@ function App() {
     setCart(newCart);
   };
 
-  const checkout = async () => {
+  const toggleFavorite = (reel) => {
+    const exists = favorites.find(f => f.id === reel.id);
+    if (exists) {
+      setFavorites(favorites.filter(f => f.id !== reel.id));
+    } else {
+      setFavorites([...favorites, reel]);
+      addNotification('Added to favorites!', reel.dish + ' saved to favorites', 'fav');
+    }
+  };
+
+  const removeFromFavorites = (id) => {
+    setFavorites(favorites.filter(f => f.id !== id));
+  };
+
+  const checkout = async (total) => {
     if (!userEmail) {
       alert('Please login first!');
       return;
@@ -63,12 +79,13 @@ function App() {
       {page === 'splash' && <Splash onDone={() => setPage('login')} />}
       {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} />}
       {page === 'register' && <Register onSwitch={() => setPage('login')} />}
-      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} />}
+      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} />}
       {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} />}
       {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} />}
       {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} />}
       {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} />}
       {page === 'tracking' && <OrderTracking onBack={() => setPage('feed')} userEmail={userEmail} />}
+      {page === 'favorites' && <Favorites favorites={favorites} onRemove={removeFromFavorites} addToCart={addToCart} onBack={() => setPage('feed')} />}
       {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
 
       {isLoggedIn && role === 'user' && (
@@ -131,6 +148,38 @@ function App() {
             )}
           </button>
 
+          <button onClick={() => setPage('favorites')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'favorites' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '12px',
+            fontWeight: page === 'favorites' ? 'bold' : 'normal',
+            position: 'relative'
+          }}>
+            <div style={{ fontSize: '20px' }}>Saved</div>
+            {favorites.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                backgroundColor: '#ff4d4d',
+                color: 'white',
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                fontSize: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>{favorites.length}</div>
+            )}
+          </button>
+
           <button onClick={() => setPage('tracking')} style={{
             backgroundColor: 'transparent',
             border: 'none',
@@ -144,38 +193,6 @@ function App() {
             fontWeight: page === 'tracking' ? 'bold' : 'normal'
           }}>
             <div style={{ fontSize: '20px' }}>Orders</div>
-          </button>
-
-          <button onClick={() => setPage('notifications')} style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: page === 'notifications' ? '#e85d04' : '#888',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
-            fontWeight: page === 'notifications' ? 'bold' : 'normal',
-            position: 'relative'
-          }}>
-            <div style={{ fontSize: '20px' }}>Notif</div>
-            {notifications.length > 0 && (
-              <div style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                backgroundColor: '#e85d04',
-                color: 'white',
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                fontSize: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>{notifications.length}</div>
-            )}
           </button>
 
           <button onClick={() => setPage('profile')} style={{

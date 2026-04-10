@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 
-function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant }) {
+function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite }) {
   const [reels, setReels] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [ordered, setOrdered] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [likes, setLikes] = useState({});
   const [ratings, setRatings] = useState({});
 
   const categories = ['All', 'Burger', 'Pizza', 'Chicken', 'Pasta', 'Sandwich'];
@@ -40,15 +39,13 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant 
     setFiltered(result);
   }, [search, activeCategory, reels]);
 
-  const handleLike = (id) => {
-    setLikes(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
   const handleRating = (id, star) => {
     setRatings(prev => ({ ...prev, [id]: star }));
   };
 
   const starSymbol = String.fromCharCode(9733);
+
+  const isFavorite = (reel) => favorites.find(f => f.id === reel.id);
 
   return (
     <div className="fade-in" style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
@@ -225,22 +222,22 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant 
                 }}>{reel.restaurant}</div>
 
               <button
-                onClick={() => handleLike(reel.id)}
+                onClick={() => toggleFavorite(reel)}
                 style={{
                   position: 'absolute',
                   top: '12px',
                   right: '16px',
-                  backgroundColor: likes[reel.id] ? 'rgba(255,77,77,0.3)' : 'rgba(0,0,0,0.3)',
+                  backgroundColor: isFavorite(reel) ? 'rgba(255,77,77,0.3)' : 'rgba(0,0,0,0.3)',
                   border: 'none',
                   borderRadius: '20px',
                   padding: '6px 14px',
                   cursor: 'pointer',
-                  color: likes[reel.id] ? '#ff4d4d' : 'white',
+                  color: isFavorite(reel) ? '#ff4d4d' : 'white',
                   fontSize: '13px',
                   fontWeight: 'bold',
                   transition: 'all 0.2s ease'
                 }}>
-                {likes[reel.id] ? 'Liked' : 'Like'}
+                {isFavorite(reel) ? 'Saved' : 'Save'}
               </button>
 
               <h2 style={{

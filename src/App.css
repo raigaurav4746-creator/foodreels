@@ -1,108 +1,219 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+import { useState } from 'react';
+import Login from './Login';
+import Register from './Register';
+import Feed from './Feed';
+import OwnerDashboard from './OwnerDashboard';
+import Profile from './Profile';
+import Cart from './Cart';
+import Splash from './Splash';
+import Notifications from './Notifications';
+import RestaurantPage from './RestaurantPage';
+import OrderTracking from './OrderTracking';
+import Favorites from './Favorites';
+
+function App() {
+  const [page, setPage] = useState('splash');
+  const [userEmail, setUserEmail] = useState('');
+  const [cart, setCart] = useState([]);
+  const [role, setRole] = useState('user');
+  const [notifications, setNotifications] = useState([]);
+  const [selectedRestaurant, setSelectedRestaurant] = useState('');
+  const [favorites, setFavorites] = useState([]);
+
+  const addNotification = (title, message, type) => {
+    const time = new Date().toLocaleTimeString();
+    setNotifications(prev => [{ title, message, type, time }, ...prev]);
+  };
+
+  const addToCart = (reel) => {
+    setCart([...cart, reel]);
+    addNotification('Added to cart!', reel.dish + ' added to your cart', 'cart');
+  };
+
+  const removeFromCart = (index) => {
+    const newCart = cart.filter((_, i) => i !== index);
+    setCart(newCart);
+  };
+
+  const toggleFavorite = (reel) => {
+    const exists = favorites.find(f => f.id === reel.id);
+    if (exists) {
+      setFavorites(favorites.filter(f => f.id !== reel.id));
+    } else {
+      setFavorites([...favorites, reel]);
+      addNotification('Added to favorites!', reel.dish + ' saved to favorites', 'fav');
+    }
+  };
+
+  const removeFromFavorites = (id) => {
+    setFavorites(favorites.filter(f => f.id !== id));
+  };
+
+  const checkout = async (total) => {
+    if (!userEmail) {
+      alert('Please login first!');
+      return;
+    }
+    try {
+      for (const item of cart) {
+        await fetch('https://foodreels-backend.onrender.com/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dish: item.dish, price: item.price, customer: userEmail })
+        });
+      }
+      addNotification('Order placed!', 'Your order of ' + cart.length + ' items has been placed', 'order');
+      setCart([]);
+      setPage('tracking');
+      alert('Order placed successfully!');
+    } catch (error) {
+      alert('Error placing order!');
+    }
+  };
+
+  const isLoggedIn = page !== 'login' && page !== 'register' && page !== 'splash';
+
+  return (
+    <div style={{ paddingBottom: isLoggedIn && role === 'user' ? '70px' : '0' }}>
+
+      {page === 'splash' && <Splash onDone={() => setPage('login')} />}
+      {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} />}
+      {page === 'register' && <Register onSwitch={() => setPage('login')} />}
+      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} />}
+      {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} />}
+      {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} />}
+      {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} />}
+      {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} />}
+      {page === 'tracking' && <OrderTracking onBack={() => setPage('feed')} userEmail={userEmail} />}
+      {page === 'favorites' && <Favorites favorites={favorites} onRemove={removeFromFavorites} addToCart={addToCart} onBack={() => setPage('feed')} />}
+      {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
+
+      {isLoggedIn && role === 'user' && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: '#0a0a0a',
+          borderTop: '1px solid #1a1a1a',
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '12px 0',
+          zIndex: 200
+        }}>
+          <button onClick={() => setPage('feed')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'feed' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '12px',
+            fontWeight: page === 'feed' ? 'bold' : 'normal'
+          }}>
+            <div style={{ fontSize: '20px' }}>Home</div>
+          </button>
+
+          <button onClick={() => setPage('cart')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'cart' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '12px',
+            fontWeight: page === 'cart' ? 'bold' : 'normal',
+            position: 'relative'
+          }}>
+            <div style={{ fontSize: '20px' }}>Cart</div>
+            {cart.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                backgroundColor: '#e85d04',
+                color: 'white',
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                fontSize: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>{cart.length}</div>
+            )}
+          </button>
+
+          <button onClick={() => setPage('favorites')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'favorites' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '12px',
+            fontWeight: page === 'favorites' ? 'bold' : 'normal',
+            position: 'relative'
+          }}>
+            <div style={{ fontSize: '20px' }}>Saved</div>
+            {favorites.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                backgroundColor: '#ff4d4d',
+                color: 'white',
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                fontSize: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>{favorites.length}</div>
+            )}
+          </button>
+
+          <button onClick={() => setPage('tracking')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'tracking' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '12px',
+            fontWeight: page === 'tracking' ? 'bold' : 'normal'
+          }}>
+            <div style={{ fontSize: '20px' }}>Orders</div>
+          </button>
+
+          <button onClick={() => setPage('profile')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'profile' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '12px',
+            fontWeight: page === 'profile' ? 'bold' : 'normal'
+          }}>
+            <div style={{ fontSize: '20px' }}>Profile</div>
+          </button>
+        </div>
+      )}
+
+    </div>
+  );
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #0a0a0a;
-  color: white;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes bounceIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.fade-in {
-  animation: fadeIn 0.4s ease forwards;
-}
-
-.slide-in {
-  animation: slideIn 0.3s ease forwards;
-}
-
-.pulse {
-  animation: pulse 2s infinite;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-.bounce-in {
-  animation: bounceIn 0.5s ease forwards;
-}
-
-button {
-  transition: transform 0.1s ease, opacity 0.1s ease;
-}
-
-button:active {
-  transform: scale(0.95);
-  opacity: 0.8;
-}
-
-input {
-  transition: border-color 0.2s ease;
-}
-
-input:focus {
-  border-color: #e85d04 !important;
-}
-
-::-webkit-scrollbar {
-  width: 0px;
-}
-
-.reel-card {
-  animation: fadeIn 0.4s ease forwards;
-  transition: transform 0.2s ease;
-}
-
-.reel-card:hover {
-  transform: translateY(-2px);
-}
-
-.nav-button {
-  transition: color 0.2s ease, transform 0.1s ease;
-}
-
-.nav-button:active {
-  transform: scale(0.9);
-}
+export default App;
