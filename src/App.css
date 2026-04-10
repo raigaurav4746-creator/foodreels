@@ -10,6 +10,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #0a0a0a;
   color: white;
+  overflow-x: hidden;
 }
 
 @keyframes fadeIn {
@@ -121,8 +122,22 @@ textarea:focus {
   transform: scale(0.9);
 }
 
+@media (max-width: 768px) {
+  button {
+    min-height: 44px;
+  }
+
+  input, textarea {
+    font-size: 16px !important;
+  }
+}
+
 @media (max-width: 480px) {
   body {
     font-size: 14px;
   }
+
+  h1 { font-size: 24px !important; }
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 18px !important; }
 }

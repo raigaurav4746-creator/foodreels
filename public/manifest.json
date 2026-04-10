@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "FoodReels",
+  "name": "FoodReels - Discover Food",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,8 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#e85d04",
+  "background_color": "#0a0a0a",
+  "orientation": "portrait",
+  "description": "Discover food. Get hungry. Order now."
 }
