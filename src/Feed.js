@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite }) {
+function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite, onReviews }) {
   const [reels, setReels] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [ordered, setOrdered] = useState(null);
@@ -44,7 +44,6 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
   };
 
   const starSymbol = String.fromCharCode(9733);
-
   const isFavorite = (reel) => favorites.find(f => f.id === reel.id);
 
   return (
@@ -256,54 +255,71 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
             </div>
 
             <div style={{
-              padding: '16px 20px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
+              padding: '16px 20px'
             }}>
-              <div>
-                <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{reel.dish}</p>
-                <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>{reel.restaurant}</p>
-                <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button
-                      key={star}
-                      onClick={() => handleRating(reel.id, star)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '20px',
-                        color: ratings[reel.id] >= star ? '#f39c12' : '#444',
-                        padding: '0',
-                        transition: 'transform 0.1s ease, color 0.1s ease'
-                      }}>
-                      {starSymbol}
-                    </button>
-                  ))}
-                  {ratings[reel.id] && (
-                    <span style={{ color: '#888', fontSize: '12px', marginLeft: '4px', alignSelf: 'center' }}>
-                      {ratings[reel.id]}/5
-                    </span>
-                  )}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '12px'
+              }}>
+                <div>
+                  <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{reel.dish}</p>
+                  <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>{reel.restaurant}</p>
+                  <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        onClick={() => handleRating(reel.id, star)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '20px',
+                          color: ratings[reel.id] >= star ? '#f39c12' : '#444',
+                          padding: '0',
+                          transition: 'color 0.1s ease'
+                        }}>
+                        {starSymbol}
+                      </button>
+                    ))}
+                    {ratings[reel.id] && (
+                      <span style={{ color: '#888', fontSize: '12px', marginLeft: '4px', alignSelf: 'center' }}>
+                        {ratings[reel.id]}/5
+                      </span>
+                    )}
+                  </div>
                 </div>
+                <button
+                  onClick={() => {
+                    addToCart(reel);
+                    setOrdered(reel.dish);
+                    setTimeout(() => setOrdered(null), 2000);
+                  }}
+                  style={{
+                    backgroundColor: '#e85d04',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}>Add to Cart</button>
               </div>
+
               <button
-                onClick={() => {
-                  addToCart(reel);
-                  setOrdered(reel.dish);
-                  setTimeout(() => setOrdered(null), 2000);
-                }}
+                onClick={() => onReviews(reel)}
                 style={{
-                  backgroundColor: '#e85d04',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}>Add to Cart</button>
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: '#2a2a2a',
+                  color: '#888',
+                  border: '1px solid #333',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontSize: '13px'
+                }}>View Reviews</button>
             </div>
           </div>
         ))}

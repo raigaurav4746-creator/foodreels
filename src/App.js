@@ -10,6 +10,7 @@ import Notifications from './Notifications';
 import RestaurantPage from './RestaurantPage';
 import OrderTracking from './OrderTracking';
 import Favorites from './Favorites';
+import Reviews from './Reviews';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -19,6 +20,7 @@ function App() {
   const [notifications, setNotifications] = useState([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState('');
   const [favorites, setFavorites] = useState([]);
+  const [selectedReel, setSelectedReel] = useState(null);
 
   const addNotification = (title, message, type) => {
     const time = new Date().toLocaleTimeString();
@@ -79,13 +81,14 @@ function App() {
       {page === 'splash' && <Splash onDone={() => setPage('login')} />}
       {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} />}
       {page === 'register' && <Register onSwitch={() => setPage('login')} />}
-      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} />}
+      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} onReviews={(reel) => { setSelectedReel(reel); setPage('reviews'); }} />}
       {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} />}
       {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} />}
       {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} />}
       {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} />}
       {page === 'tracking' && <OrderTracking onBack={() => setPage('feed')} userEmail={userEmail} />}
       {page === 'favorites' && <Favorites favorites={favorites} onRemove={removeFromFavorites} addToCart={addToCart} onBack={() => setPage('feed')} />}
+      {page === 'reviews' && <Reviews reel={selectedReel} userEmail={userEmail} onBack={() => setPage('feed')} />}
       {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
 
       {isLoggedIn && role === 'user' && (
