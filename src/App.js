@@ -11,6 +11,7 @@ import RestaurantPage from './RestaurantPage';
 import OrderTracking from './OrderTracking';
 import Favorites from './Favorites';
 import Reviews from './Reviews';
+import Chatbot from './Chatbot';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -89,6 +90,7 @@ function App() {
       {page === 'tracking' && <OrderTracking onBack={() => setPage('feed')} userEmail={userEmail} />}
       {page === 'favorites' && <Favorites favorites={favorites} onRemove={removeFromFavorites} addToCart={addToCart} onBack={() => setPage('feed')} />}
       {page === 'reviews' && <Reviews reel={selectedReel} userEmail={userEmail} onBack={() => setPage('feed')} />}
+      {page === 'chatbot' && <Chatbot onBack={() => setPage('feed')} userEmail={userEmail} />}
       {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
 
       {isLoggedIn && role === 'user' && (
@@ -113,10 +115,10 @@ function App() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: page === 'feed' ? 'bold' : 'normal'
           }}>
-            <div style={{ fontSize: '20px' }}>Home</div>
+            <div style={{ fontSize: '18px' }}>Home</div>
           </button>
 
           <button onClick={() => setPage('cart')} style={{
@@ -128,11 +130,11 @@ function App() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: page === 'cart' ? 'bold' : 'normal',
             position: 'relative'
           }}>
-            <div style={{ fontSize: '20px' }}>Cart</div>
+            <div style={{ fontSize: '18px' }}>Cart</div>
             {cart.length > 0 && (
               <div style={{
                 position: 'absolute',
@@ -151,6 +153,21 @@ function App() {
             )}
           </button>
 
+          <button onClick={() => setPage('chatbot')} style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: page === 'chatbot' ? '#e85d04' : '#888',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '11px',
+            fontWeight: page === 'chatbot' ? 'bold' : 'normal'
+          }}>
+            <div style={{ fontSize: '18px' }}>Bot</div>
+          </button>
+
           <button onClick={() => setPage('favorites')} style={{
             backgroundColor: 'transparent',
             border: 'none',
@@ -160,11 +177,11 @@ function App() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: page === 'favorites' ? 'bold' : 'normal',
             position: 'relative'
           }}>
-            <div style={{ fontSize: '20px' }}>Saved</div>
+            <div style={{ fontSize: '18px' }}>Saved</div>
             {favorites.length > 0 && (
               <div style={{
                 position: 'absolute',
@@ -192,10 +209,10 @@ function App() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: page === 'tracking' ? 'bold' : 'normal'
           }}>
-            <div style={{ fontSize: '20px' }}>Orders</div>
+            <div style={{ fontSize: '18px' }}>Orders</div>
           </button>
 
           <button onClick={() => setPage('profile')} style={{
@@ -207,10 +224,10 @@ function App() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: page === 'profile' ? 'bold' : 'normal'
           }}>
-            <div style={{ fontSize: '20px' }}>Profile</div>
+            <div style={{ fontSize: '18px' }}>Profile</div>
           </button>
         </div>
       )}
