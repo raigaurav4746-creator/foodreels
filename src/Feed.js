@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Logo from './Logo';
 
 function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite, onReviews }) {
   const [reels, setReels] = useState([]);
@@ -10,6 +11,20 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
   const [ratings, setRatings] = useState({});
 
   const categories = ['All', 'Burger', 'Pizza', 'Chicken', 'Pasta', 'Sandwich'];
+
+  const foodImages = {
+    'Whopper Burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80',
+    'Margherita Pizza': 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80',
+    'Crispy Chicken': 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400&q=80',
+    'Pasta Italiana': 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&q=80',
+    'Veggie Sandwich': 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=400&q=80',
+    'McChicken Burger': 'https://images.unsplash.com/photo-1550317138-10000687a72b?w=400&q=80',
+    'Chicken Pizza': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80',
+  };
+
+  const getImage = (dish) => {
+    return foodImages[dish] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';
+  };
 
   useEffect(() => {
     fetch('https://foodreels-backend.onrender.com/reels')
@@ -63,18 +78,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
           alignItems: 'center'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              backgroundColor: '#e85d04',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '16px'
-            }}>F</div>
+            <Logo size={32} />
             <h2 style={{ color: 'white', margin: 0, fontSize: '18px' }}>FoodReels</h2>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -200,24 +204,42 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
             animationDelay: index * 0.1 + 's'
           }}>
             <div style={{
-              backgroundColor: reel.color,
-              padding: '60px 20px 40px',
-              textAlign: 'center',
-              position: 'relative'
+              position: 'relative',
+              height: '220px',
+              overflow: 'hidden'
             }}>
+              <img
+                src={getImage(reel.dish)}
+                alt={reel.dish}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)'
+              }}></div>
+
               <div
                 onClick={() => onRestaurant(reel.restaurant)}
                 style={{
                   position: 'absolute',
                   top: '16px',
                   left: '16px',
-                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
                   color: 'white',
                   padding: '4px 12px',
                   borderRadius: '20px',
                   fontSize: '12px',
                   cursor: 'pointer',
-                  textDecoration: 'underline'
+                  textDecoration: 'underline',
+                  backdropFilter: 'blur(4px)'
                 }}>{reel.restaurant}</div>
 
               <button
@@ -226,7 +248,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                   position: 'absolute',
                   top: '12px',
                   right: '16px',
-                  backgroundColor: isFavorite(reel) ? 'rgba(255,77,77,0.3)' : 'rgba(0,0,0,0.3)',
+                  backgroundColor: isFavorite(reel) ? 'rgba(255,77,77,0.5)' : 'rgba(0,0,0,0.5)',
                   border: 'none',
                   borderRadius: '20px',
                   padding: '6px 14px',
@@ -234,29 +256,34 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                   color: isFavorite(reel) ? '#ff4d4d' : 'white',
                   fontSize: '13px',
                   fontWeight: 'bold',
-                  transition: 'all 0.2s ease'
+                  backdropFilter: 'blur(4px)'
                 }}>
                 {isFavorite(reel) ? 'Saved' : 'Save'}
               </button>
 
-              <h2 style={{
-                color: 'white',
-                fontSize: '26px',
-                margin: '0 0 8px',
-                textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-              }}>{reel.dish}</h2>
-              <p style={{
-                color: 'white',
-                fontSize: '20px',
-                fontWeight: 'bold',
-                margin: 0,
-                opacity: 0.9
-              }}>Rs. {reel.price}</p>
+              <div style={{
+                position: 'absolute',
+                bottom: '16px',
+                left: '16px',
+                right: '16px'
+              }}>
+                <h2 style={{
+                  color: 'white',
+                  fontSize: '22px',
+                  margin: '0 0 4px',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}>{reel.dish}</h2>
+                <p style={{
+                  color: 'white',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  margin: 0,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}>Rs. {reel.price}</p>
+              </div>
             </div>
 
-            <div style={{
-              padding: '16px 20px'
-            }}>
+            <div style={{ padding: '16px 20px' }}>
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
