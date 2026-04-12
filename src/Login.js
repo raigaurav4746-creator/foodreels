@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Logo from './Logo';
 
 function Login({ onSwitch, onLogin }) {
   const [role, setRole] = useState('user');
@@ -49,19 +50,9 @@ function Login({ onSwitch, onLogin }) {
         border: '1px solid #2a2a2a'
       }}>
         <div className="bounce-in" style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#e85d04',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px',
-            fontSize: '28px',
-            color: 'white',
-            fontWeight: 'bold'
-          }}>F</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <Logo size={64} />
+          </div>
           <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>FoodReels</h2>
           <p style={{ color: '#888', margin: '8px 0 0', fontSize: '14px' }}>Sign in to continue</p>
         </div>
@@ -91,9 +82,7 @@ function Login({ onSwitch, onLogin }) {
         />
 
         <button onClick={handleLogin} style={{ width: '100%', padding: '14px', backgroundColor: loading ? '#854f0b' : '#e85d04', color: 'white', border: 'none', borderRadius: '10px', fontSize: '16px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer' }}>
-          {loading ? (
-            <span>Signing in...</span>
-          ) : 'Sign In'}
+          {loading ? 'Signing in...' : 'Sign In'}
         </button>
 
         <p style={{ textAlign: 'center', marginTop: '20px', color: '#888', fontSize: '14px' }}>

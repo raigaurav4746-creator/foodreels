@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Logo from './Logo';
 
 function Register({ onSwitch }) {
   const [role, setRole] = useState('user');
@@ -52,19 +53,9 @@ function Register({ onSwitch }) {
         border: '1px solid #2a2a2a'
       }}>
         <div className="bounce-in" style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#e85d04',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px',
-            fontSize: '28px',
-            color: 'white',
-            fontWeight: 'bold'
-          }}>F</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <Logo size={64} />
+          </div>
           <h2 style={{ color: 'white', margin: 0, fontSize: '24px' }}>FoodReels</h2>
           <p style={{ color: '#888', margin: '8px 0 0', fontSize: '14px' }}>Create your account</p>
         </div>

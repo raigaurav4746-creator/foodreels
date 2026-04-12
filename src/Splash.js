@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Logo from './Logo';
 
 function Splash({ onDone }) {
   const [step, setStep] = useState(0);
@@ -27,22 +28,8 @@ function Splash({ onDone }) {
       alignItems: 'center',
       padding: '20px'
     }}>
-      <div className="bounce-in" style={{
-        width: '120px',
-        height: '120px',
-        backgroundColor: '#e85d04',
-        borderRadius: '32px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: '32px',
-        boxShadow: '0 20px 60px rgba(232, 93, 4, 0.4)'
-      }}>
-        <span style={{
-          fontSize: '56px',
-          color: 'white',
-          fontWeight: 'bold'
-        }}>F</span>
+      <div className="bounce-in" style={{ marginBottom: '32px' }}>
+        <Logo size={120} />
       </div>
 
       <h1 className="fade-in" style={{
