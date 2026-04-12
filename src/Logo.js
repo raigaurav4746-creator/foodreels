@@ -1,1 +1,18 @@
-function Logo({ size = 32 }) { return <div style={{ width: size, height: size, borderRadius: size * 0.25, background: 'linear-gradient(135deg, #e85d04 0%, #ff6b6b 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(232,93,4,0.4)' }}><span style={{ color: 'white', fontWeight: '900', fontSize: size * 0.5, zIndex: 1 }}>FR</span></div>; } export default Logo;
+import logoImg from './logo.png';
+
+function Logo({ size = 32 }) {
+  return (
+    <img
+      src={logoImg}
+      alt="FoodReels"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.2,
+        objectFit: 'cover'
+      }}
+    />
+  );
+}
+
+export default Logo;
