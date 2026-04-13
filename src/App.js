@@ -22,6 +22,17 @@ function App() {
   const [selectedRestaurant, setSelectedRestaurant] = useState('');
   const [favorites, setFavorites] = useState([]);
   const [selectedReel, setSelectedReel] = useState(null);
+  const [darkMode, setDarkMode] = useState(true);
+
+  const theme = {
+    bg: darkMode ? '#0a0a0a' : '#f5f5f5',
+    card: darkMode ? '#1a1a1a' : '#ffffff',
+    border: darkMode ? '#2a2a2a' : '#e0e0e0',
+    text: darkMode ? 'white' : '#1a1a1a',
+    subtext: darkMode ? '#888' : '#666',
+    input: darkMode ? '#2a2a2a' : '#f0f0f0',
+    accent: '#e85d04'
+  };
 
   const addNotification = (title, message, type) => {
     const time = new Date().toLocaleTimeString();
@@ -77,21 +88,21 @@ function App() {
   const isLoggedIn = page !== 'login' && page !== 'register' && page !== 'splash';
 
   return (
-    <div style={{ paddingBottom: isLoggedIn && role === 'user' ? '70px' : '0' }}>
+    <div style={{ backgroundColor: theme.bg, minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
 
-      {page === 'splash' && <Splash onDone={() => setPage('login')} />}
-      {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} />}
-      {page === 'register' && <Register onSwitch={() => setPage('login')} />}
-      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} onReviews={(reel) => { setSelectedReel(reel); setPage('reviews'); }} />}
-      {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} />}
-      {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} />}
-      {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} />}
-      {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} />}
-      {page === 'tracking' && <OrderTracking onBack={() => setPage('feed')} userEmail={userEmail} />}
-      {page === 'favorites' && <Favorites favorites={favorites} onRemove={removeFromFavorites} addToCart={addToCart} onBack={() => setPage('feed')} />}
-      {page === 'reviews' && <Reviews reel={selectedReel} userEmail={userEmail} onBack={() => setPage('feed')} />}
-      {page === 'chatbot' && <Chatbot onBack={() => setPage('feed')} userEmail={userEmail} />}
-      {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
+      {page === 'splash' && <Splash onDone={() => setPage('login')} theme={theme} />}
+      {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} theme={theme} />}
+      {page === 'register' && <Register onSwitch={() => setPage('login')} theme={theme} />}
+      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} onReviews={(reel) => { setSelectedReel(reel); setPage('reviews'); }} theme={theme} />}
+      {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} theme={theme} darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />}
+      {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} theme={theme} />}
+      {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} theme={theme} />}
+      {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} theme={theme} />}
+      {page === 'tracking' && <OrderTracking onBack={() => setPage('feed')} userEmail={userEmail} theme={theme} />}
+      {page === 'favorites' && <Favorites favorites={favorites} onRemove={removeFromFavorites} addToCart={addToCart} onBack={() => setPage('feed')} theme={theme} />}
+      {page === 'reviews' && <Reviews reel={selectedReel} userEmail={userEmail} onBack={() => setPage('feed')} theme={theme} />}
+      {page === 'chatbot' && <Chatbot onBack={() => setPage('feed')} userEmail={userEmail} theme={theme} />}
+      {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} theme={theme} />}
 
       {isLoggedIn && role === 'user' && (
         <div style={{
@@ -99,17 +110,18 @@ function App() {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: '#0a0a0a',
-          borderTop: '1px solid #1a1a1a',
+          backgroundColor: theme.card,
+          borderTop: '1px solid ' + theme.border,
           display: 'flex',
           justifyContent: 'space-around',
           padding: '12px 0',
-          zIndex: 200
+          zIndex: 200,
+          transition: 'background-color 0.3s ease'
         }}>
           <button onClick={() => setPage('feed')} style={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: page === 'feed' ? '#e85d04' : '#888',
+            color: page === 'feed' ? '#e85d04' : theme.subtext,
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
@@ -124,7 +136,7 @@ function App() {
           <button onClick={() => setPage('cart')} style={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: page === 'cart' ? '#e85d04' : '#888',
+            color: page === 'cart' ? '#e85d04' : theme.subtext,
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
@@ -156,7 +168,7 @@ function App() {
           <button onClick={() => setPage('chatbot')} style={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: page === 'chatbot' ? '#e85d04' : '#888',
+            color: page === 'chatbot' ? '#e85d04' : theme.subtext,
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
@@ -171,7 +183,7 @@ function App() {
           <button onClick={() => setPage('favorites')} style={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: page === 'favorites' ? '#e85d04' : '#888',
+            color: page === 'favorites' ? '#e85d04' : theme.subtext,
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
@@ -203,7 +215,7 @@ function App() {
           <button onClick={() => setPage('tracking')} style={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: page === 'tracking' ? '#e85d04' : '#888',
+            color: page === 'tracking' ? '#e85d04' : theme.subtext,
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
@@ -218,7 +230,7 @@ function App() {
           <button onClick={() => setPage('profile')} style={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: page === 'profile' ? '#e85d04' : '#888',
+            color: page === 'profile' ? '#e85d04' : theme.subtext,
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
