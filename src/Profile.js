@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Logo from './Logo';
 
-function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode }) {
+function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode, onFollowing, followedCount }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [shareMessage, setShareMessage] = useState('');
@@ -36,23 +36,29 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
     }
   };
 
+  const bgColor = theme ? theme.bg : '#0a0a0a';
+  const cardColor = theme ? theme.card : '#1a1a1a';
+  const borderColor = theme ? theme.border : '#2a2a2a';
+  const textColor = theme ? theme.text : 'white';
+  const subtextColor = theme ? theme.subtext : '#888';
+
   return (
-    <div className="fade-in" style={{ backgroundColor: theme.bg, minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
+    <div className="fade-in" style={{ backgroundColor: bgColor, minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
 
       <div style={{
         position: 'sticky',
         top: 0,
-        backgroundColor: theme.bg,
+        backgroundColor: bgColor,
         padding: '16px 20px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottom: '1px solid ' + theme.border,
+        borderBottom: '1px solid ' + borderColor,
         zIndex: 100
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Logo size={32} />
-          <h2 style={{ color: theme.text, margin: 0, fontSize: '18px' }}>My Profile</h2>
+          <h2 style={{ color: textColor, margin: 0, fontSize: '18px' }}>My Profile</h2>
         </div>
         <button onClick={onLogout} style={{
           backgroundColor: 'transparent',
@@ -68,8 +74,8 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
       <div style={{ padding: '20px' }}>
 
         <div className="bounce-in" style={{
-          backgroundColor: theme.card,
-          border: '1px solid ' + theme.border,
+          backgroundColor: cardColor,
+          border: '1px solid ' + borderColor,
           borderRadius: '20px',
           padding: '24px',
           textAlign: 'center',
@@ -89,38 +95,68 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
             fontWeight: 'bold',
             boxShadow: '0 8px 24px rgba(232, 93, 4, 0.3)'
           }}>{userEmail ? userEmail[0].toUpperCase() : 'U'}</div>
-          <h3 style={{ color: theme.text, margin: 0, fontSize: '20px' }}>My Account</h3>
-          <p style={{ color: theme.subtext, margin: '8px 0 0', fontSize: '14px' }}>{userEmail}</p>
+          <h3 style={{ color: textColor, margin: 0, fontSize: '20px' }}>My Account</h3>
+          <p style={{ color: subtextColor, margin: '8px 0 0', fontSize: '14px' }}>{userEmail}</p>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
           <div style={{
             flex: 1,
-            backgroundColor: theme.card,
-            border: '1px solid ' + theme.border,
+            backgroundColor: cardColor,
+            border: '1px solid ' + borderColor,
             borderRadius: '16px',
             padding: '20px',
             textAlign: 'center'
           }}>
             <h3 style={{ color: '#e85d04', margin: 0, fontSize: '28px' }}>{orders.length}</h3>
-            <p style={{ color: theme.subtext, margin: '4px 0 0', fontSize: '13px' }}>My Orders</p>
+            <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>My Orders</p>
           </div>
           <div style={{
             flex: 1,
-            backgroundColor: theme.card,
-            border: '1px solid ' + theme.border,
+            backgroundColor: cardColor,
+            border: '1px solid ' + borderColor,
             borderRadius: '16px',
             padding: '20px',
             textAlign: 'center'
           }}>
             <h3 style={{ color: '#2ecc71', margin: 0, fontSize: '24px' }}>Rs.{totalSpent}</h3>
-            <p style={{ color: theme.subtext, margin: '4px 0 0', fontSize: '13px' }}>Total Spent</p>
+            <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>Total Spent</p>
+          </div>
+        </div>
+
+        <div
+          onClick={onFollowing}
+          style={{
+            backgroundColor: cardColor,
+            border: '1px solid ' + borderColor,
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer'
+          }}>
+          <div>
+            <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>Following</p>
+            <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>Restaurants you follow</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              backgroundColor: '#e85d04',
+              color: 'white',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '13px',
+              fontWeight: 'bold'
+            }}>{followedCount}</div>
+            <span style={{ color: subtextColor, fontSize: '18px' }}>›</span>
           </div>
         </div>
 
         <div style={{
-          backgroundColor: theme.card,
-          border: '1px solid ' + theme.border,
+          backgroundColor: cardColor,
+          border: '1px solid ' + borderColor,
           borderRadius: '16px',
           padding: '20px',
           marginBottom: '16px',
@@ -129,10 +165,10 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
           alignItems: 'center'
         }}>
           <div>
-            <p style={{ color: theme.text, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>
+            <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>
               {darkMode ? 'Dark Mode' : 'Light Mode'}
             </p>
-            <p style={{ color: theme.subtext, margin: '4px 0 0', fontSize: '13px' }}>
+            <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>
               Switch app theme
             </p>
           </div>
@@ -168,14 +204,14 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
         )}
 
         <div style={{
-          backgroundColor: theme.card,
-          border: '1px solid ' + theme.border,
+          backgroundColor: cardColor,
+          border: '1px solid ' + borderColor,
           borderRadius: '16px',
           padding: '20px',
           marginBottom: '24px'
         }}>
-          <h3 style={{ color: theme.text, margin: '0 0 12px', fontSize: '16px' }}>Share FoodReels</h3>
-          <p style={{ color: theme.subtext, margin: '0 0 16px', fontSize: '14px' }}>Share this app with your friends!</p>
+          <h3 style={{ color: textColor, margin: '0 0 12px', fontSize: '16px' }}>Share FoodReels</h3>
+          <p style={{ color: subtextColor, margin: '0 0 16px', fontSize: '14px' }}>Share this app with your friends!</p>
           <button
             onClick={handleShare}
             style={{
@@ -191,14 +227,14 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
             }}>Share FoodReels App</button>
         </div>
 
-        <h3 style={{ color: theme.text, marginBottom: '16px', fontSize: '16px' }}>Order History</h3>
+        <h3 style={{ color: textColor, marginBottom: '16px', fontSize: '16px' }}>Order History</h3>
 
         {loading && (
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
             <div className="spin" style={{
               width: '30px',
               height: '30px',
-              border: '3px solid ' + theme.border,
+              border: '3px solid ' + borderColor,
               borderTop: '3px solid #e85d04',
               borderRadius: '50%',
               margin: '0 auto'
@@ -208,21 +244,21 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
 
         {!loading && orders.length === 0 && (
           <div style={{
-            backgroundColor: theme.card,
-            border: '1px solid ' + theme.border,
+            backgroundColor: cardColor,
+            border: '1px solid ' + borderColor,
             borderRadius: '16px',
             padding: '40px',
             textAlign: 'center'
           }}>
-            <p style={{ color: theme.subtext, margin: 0 }}>No orders yet!</p>
-            <p style={{ color: theme.subtext, margin: '8px 0 0', fontSize: '14px' }}>Start ordering from the Feed</p>
+            <p style={{ color: subtextColor, margin: 0 }}>No orders yet!</p>
+            <p style={{ color: subtextColor, margin: '8px 0 0', fontSize: '14px' }}>Start ordering from the Feed</p>
           </div>
         )}
 
         {orders.map((order, index) => (
           <div key={index} className="slide-in" style={{
-            backgroundColor: theme.card,
-            border: '1px solid ' + theme.border,
+            backgroundColor: cardColor,
+            border: '1px solid ' + borderColor,
             borderRadius: '12px',
             padding: '16px',
             marginBottom: '10px',
@@ -231,8 +267,8 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode 
             alignItems: 'center'
           }}>
             <div>
-              <p style={{ color: theme.text, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{order.dish}</p>
-              <p style={{ color: theme.subtext, margin: '4px 0 0', fontSize: '13px' }}>{order.status}</p>
+              <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{order.dish}</p>
+              <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>{order.status}</p>
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ color: '#2ecc71', fontWeight: 'bold', margin: 0 }}>Rs. {order.price}</p>

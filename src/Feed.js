@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Logo from './Logo';
 
-function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite, onReviews }) {
+function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite, onReviews, theme, followed, toggleFollow }) {
   const [reels, setReels] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [ordered, setOrdered] = useState(null);
@@ -60,15 +60,22 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
 
   const starSymbol = String.fromCharCode(9733);
   const isFavorite = (reel) => favorites.find(f => f.id === reel.id);
+  const isFollowed = (restaurant) => followed.includes(restaurant);
+
+  const bgColor = theme ? theme.bg : '#0a0a0a';
+  const cardColor = theme ? theme.card : '#1a1a1a';
+  const borderColor = theme ? theme.border : '#2a2a2a';
+  const textColor = theme ? theme.text : 'white';
+  const subtextColor = theme ? theme.subtext : '#888';
 
   return (
-    <div className="fade-in" style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
+    <div className="fade-in" style={{ backgroundColor: bgColor, minHeight: '100vh' }}>
 
       <div style={{
         position: 'sticky',
         top: 0,
-        backgroundColor: '#0a0a0a',
-        borderBottom: '1px solid #1a1a1a',
+        backgroundColor: bgColor,
+        borderBottom: '1px solid ' + borderColor,
         zIndex: 100
       }}>
         <div style={{
@@ -79,7 +86,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Logo size={32} />
-            <h2 style={{ color: 'white', margin: 0, fontSize: '18px' }}>FoodReels</h2>
+            <h2 style={{ color: textColor, margin: 0, fontSize: '18px' }}>FoodReels</h2>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={onCart} style={{
@@ -93,18 +100,18 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
               fontWeight: 'bold'
             }}>Cart {cartCount > 0 ? '(' + cartCount + ')' : ''}</button>
             <button onClick={onProfile} style={{
-              backgroundColor: '#1a1a1a',
-              color: 'white',
-              border: '1px solid #2a2a2a',
+              backgroundColor: cardColor,
+              color: textColor,
+              border: '1px solid ' + borderColor,
               padding: '8px 16px',
               borderRadius: '20px',
               cursor: 'pointer',
               fontSize: '13px'
             }}>Profile</button>
             <button onClick={onLogout} style={{
-              backgroundColor: '#1a1a1a',
+              backgroundColor: cardColor,
               color: '#e85d04',
-              border: '1px solid #2a2a2a',
+              border: '1px solid ' + borderColor,
               padding: '8px 16px',
               borderRadius: '20px',
               cursor: 'pointer',
@@ -122,9 +129,9 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
               width: '100%',
               padding: '12px 16px',
               borderRadius: '12px',
-              border: '1px solid #2a2a2a',
-              backgroundColor: '#1a1a1a',
-              color: 'white',
+              border: '1px solid ' + borderColor,
+              backgroundColor: theme ? theme.input : '#1a1a1a',
+              color: textColor,
               fontSize: '14px',
               boxSizing: 'border-box',
               outline: 'none'
@@ -146,8 +153,8 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                 padding: '6px 16px',
                 borderRadius: '20px',
                 border: 'none',
-                backgroundColor: activeCategory === cat ? '#e85d04' : '#1a1a1a',
-                color: activeCategory === cat ? 'white' : '#888',
+                backgroundColor: activeCategory === cat ? '#e85d04' : cardColor,
+                color: activeCategory === cat ? 'white' : subtextColor,
                 cursor: 'pointer',
                 fontSize: '13px',
                 fontWeight: activeCategory === cat ? 'bold' : 'normal',
@@ -178,19 +185,19 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
             <div className="spin" style={{
               width: '40px',
               height: '40px',
-              border: '4px solid #333',
+              border: '4px solid ' + borderColor,
               borderTop: '4px solid #e85d04',
               borderRadius: '50%',
               margin: '0 auto 16px'
             }}></div>
-            <p style={{ color: '#888', fontSize: '16px' }}>Loading reels...</p>
+            <p style={{ color: subtextColor, fontSize: '16px' }}>Loading reels...</p>
           </div>
         )}
 
         {!loading && filtered.length === 0 && (
           <div className="fade-in" style={{ textAlign: 'center', marginTop: '100px' }}>
-            <p style={{ color: '#888', fontSize: '16px' }}>No results found!</p>
-            <p style={{ color: '#555', fontSize: '14px' }}>Try a different search</p>
+            <p style={{ color: subtextColor, fontSize: '16px' }}>No results found!</p>
+            <p style={{ color: subtextColor, fontSize: '14px' }}>Try a different search</p>
           </div>
         )}
 
@@ -199,8 +206,8 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
             borderRadius: '24px',
             marginBottom: '16px',
             overflow: 'hidden',
-            backgroundColor: '#1a1a1a',
-            border: '1px solid #2a2a2a',
+            backgroundColor: cardColor,
+            border: '1px solid ' + borderColor,
             animationDelay: index * 0.1 + 's'
           }}>
             <div style={{
@@ -226,21 +233,42 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                 background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)'
               }}></div>
 
-              <div
-                onClick={() => onRestaurant(reel.restaurant)}
-                style={{
-                  position: 'absolute',
-                  top: '16px',
-                  left: '16px',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  color: 'white',
-                  padding: '4px 12px',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  backdropFilter: 'blur(4px)'
-                }}>{reel.restaurant}</div>
+              <div style={{
+                position: 'absolute',
+                top: '16px',
+                left: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <div
+                  onClick={() => onRestaurant(reel.restaurant)}
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    color: 'white',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    backdropFilter: 'blur(4px)'
+                  }}>{reel.restaurant}</div>
+                <button
+                  onClick={() => toggleFollow(reel.restaurant)}
+                  style={{
+                    backgroundColor: isFollowed(reel.restaurant) ? 'rgba(232,93,4,0.8)' : 'rgba(0,0,0,0.5)',
+                    border: 'none',
+                    borderRadius: '20px',
+                    padding: '4px 12px',
+                    cursor: 'pointer',
+                    color: 'white',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    backdropFilter: 'blur(4px)'
+                  }}>
+                  {isFollowed(reel.restaurant) ? 'Following' : 'Follow'}
+                </button>
+              </div>
 
               <button
                 onClick={() => toggleFavorite(reel)}
@@ -291,8 +319,8 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                 marginBottom: '12px'
               }}>
                 <div>
-                  <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{reel.dish}</p>
-                  <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>{reel.restaurant}</p>
+                  <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{reel.dish}</p>
+                  <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>{reel.restaurant}</p>
                   <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
                     {[1, 2, 3, 4, 5].map(star => (
                       <button
@@ -303,7 +331,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                           border: 'none',
                           cursor: 'pointer',
                           fontSize: '20px',
-                          color: ratings[reel.id] >= star ? '#f39c12' : '#444',
+                          color: ratings[reel.id] >= star ? '#f39c12' : borderColor,
                           padding: '0',
                           transition: 'color 0.1s ease'
                         }}>
@@ -311,7 +339,7 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                       </button>
                     ))}
                     {ratings[reel.id] && (
-                      <span style={{ color: '#888', fontSize: '12px', marginLeft: '4px', alignSelf: 'center' }}>
+                      <span style={{ color: subtextColor, fontSize: '12px', marginLeft: '4px', alignSelf: 'center' }}>
                         {ratings[reel.id]}/5
                       </span>
                     )}
@@ -340,9 +368,9 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
                 style={{
                   width: '100%',
                   padding: '10px',
-                  backgroundColor: '#2a2a2a',
-                  color: '#888',
-                  border: '1px solid #333',
+                  backgroundColor: theme ? theme.input : '#2a2a2a',
+                  color: subtextColor,
+                  border: '1px solid ' + borderColor,
                   borderRadius: '10px',
                   cursor: 'pointer',
                   fontSize: '13px'

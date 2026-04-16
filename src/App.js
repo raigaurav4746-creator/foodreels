@@ -12,6 +12,7 @@ import OrderTracking from './OrderTracking';
 import Favorites from './Favorites';
 import Reviews from './Reviews';
 import Chatbot from './Chatbot';
+import FollowedRestaurants from './FollowedRestaurants';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -23,6 +24,7 @@ function App() {
   const [favorites, setFavorites] = useState([]);
   const [selectedReel, setSelectedReel] = useState(null);
   const [darkMode, setDarkMode] = useState(true);
+  const [followed, setFollowed] = useState([]);
 
   const theme = {
     bg: darkMode ? '#0a0a0a' : '#f5f5f5',
@@ -63,6 +65,16 @@ function App() {
     setFavorites(favorites.filter(f => f.id !== id));
   };
 
+  const toggleFollow = (restaurant) => {
+    if (followed.includes(restaurant)) {
+      setFollowed(followed.filter(r => r !== restaurant));
+      addNotification('Unfollowed!', 'You unfollowed ' + restaurant, 'follow');
+    } else {
+      setFollowed([...followed, restaurant]);
+      addNotification('Following!', 'You are now following ' + restaurant, 'follow');
+    }
+  };
+
   const checkout = async (total) => {
     if (!userEmail) {
       alert('Please login first!');
@@ -93,8 +105,8 @@ function App() {
       {page === 'splash' && <Splash onDone={() => setPage('login')} theme={theme} />}
       {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} theme={theme} />}
       {page === 'register' && <Register onSwitch={() => setPage('login')} theme={theme} />}
-      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} onReviews={(reel) => { setSelectedReel(reel); setPage('reviews'); }} theme={theme} />}
-      {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} theme={theme} darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />}
+      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onFavorites={() => setPage('favorites')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }} favorites={favorites} toggleFavorite={toggleFavorite} onReviews={(reel) => { setSelectedReel(reel); setPage('reviews'); }} theme={theme} followed={followed} toggleFollow={toggleFollow} />}
+      {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} theme={theme} darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} onFollowing={() => setPage('following')} followedCount={followed.length} />}
       {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} theme={theme} />}
       {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} theme={theme} />}
       {page === 'restaurant' && <RestaurantPage restaurant={selectedRestaurant} onBack={() => setPage('feed')} addToCart={addToCart} theme={theme} />}
@@ -102,6 +114,7 @@ function App() {
       {page === 'favorites' && <Favorites favorites={favorites} onRemove={removeFromFavorites} addToCart={addToCart} onBack={() => setPage('feed')} theme={theme} />}
       {page === 'reviews' && <Reviews reel={selectedReel} userEmail={userEmail} onBack={() => setPage('feed')} theme={theme} />}
       {page === 'chatbot' && <Chatbot onBack={() => setPage('feed')} userEmail={userEmail} theme={theme} />}
+      {page === 'following' && <FollowedRestaurants followed={followed} onUnfollow={(r) => toggleFollow(r)} onBack={() => setPage('profile')} theme={theme} addToCart={addToCart} />}
       {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} theme={theme} />}
 
       {isLoggedIn && role === 'user' && (
