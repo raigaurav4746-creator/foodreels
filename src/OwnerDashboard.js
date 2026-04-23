@@ -1,27 +1,55 @@
 import { useState, useEffect } from 'react';
+import Logo from './Logo';
 
-function OwnerDashboard({ onLogout }) {
+function OwnerDashboard({ onLogout, theme, ownerEmail }) {
   const [orders, setOrders] = useState([]);
+  const [reels, setReels] = useState([]);
   const [dish, setDish] = useState('');
   const [price, setPrice] = useState('');
+  const [restaurant, setRestaurant] = useState('');
+  const [color, setColor] = useState('#e85d04');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const bgColor = theme ? theme.bg : '#0a0a0a';
+  const cardColor = theme ? theme.card : '#1a1a1a';
+  const borderColor = theme ? theme.border : '#2a2a2a';
+  const textColor = theme ? theme.text : 'white';
+  const subtextColor = theme ? theme.subtext : '#888';
+
+  const colorOptions = [
+    '#ff6b6b', '#ffa500', '#ff4500', '#e85d04',
+    '#2ecc71', '#f39c12', '#8e44ad', '#3498db'
+  ];
+
+  const fetchData = async () => {
+    setRefreshing(true);
+    try {
+      const [ordersRes, reelsRes] = await Promise.all([
+        fetch('https://foodreels-backend.onrender.com/orders'),
+        fetch('https://foodreels-backend.onrender.com/reels')
+      ]);
+      const ordersData = await ordersRes.json();
+      const reelsData = await reelsRes.json();
+      setOrders(Array.isArray(ordersData) ? ordersData : []);
+      setReels(Array.isArray(reelsData) ? reelsData : []);
+    } catch (err) {
+      console.log(err);
+    }
+    setLoading(false);
+    setRefreshing(false);
+  };
 
   useEffect(() => {
-    fetch('https://foodreels-backend.onrender.com/orders')
-      .then(res => res.json())
-      .then(data => {
-        setOrders(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.log(err);
-        setLoading(false);
-      });
+    fetchData();
+    const interval = setInterval(fetchData, 15000);
+    return () => clearInterval(interval);
   }, []);
 
-  const totalRevenue = orders.reduce((sum, order) => sum + order.price, 0);
+  const myReels = reels.filter(r => r.restaurant === restaurant || restaurant === '');
+  const totalRevenue = orders.reduce((sum, o) => sum + o.price, 0);
   const avgOrderValue = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
 
   const dishCount = orders.reduce((acc, order) => {
@@ -34,94 +62,67 @@ function OwnerDashboard({ onLogout }) {
     .slice(0, 5);
 
   const handleUpload = async () => {
-    if (!dish || !price) {
-      setMessage('Please fill in all fields!');
+    if (!dish || !price || !restaurant) {
+      setMessage('Please fill in Restaurant Name, Dish Name and Price!');
       return;
     }
     try {
       const response = await fetch('https://foodreels-backend.onrender.com/reels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          restaurant: 'My Restaurant',
-          dish,
-          price: parseInt(price),
-          color: '#e85d04'
-        })
+        body: JSON.stringify({ restaurant, dish, price: parseInt(price), color })
       });
+      const data = await response.json();
       if (response.ok) {
-        setMessage('Reel uploaded successfully!');
+        setMessage('Dish added to FoodReels successfully!');
         setDish('');
         setPrice('');
+        fetchData();
         setTimeout(() => setMessage(''), 3000);
+      } else {
+        setMessage(data.message || 'Error adding dish!');
       }
     } catch (error) {
-      setMessage('Error uploading reel!');
+      setMessage('Server error. Please try again.');
     }
   };
 
   return (
-    <div className="fade-in" style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
+    <div className="fade-in" style={{ backgroundColor: bgColor, minHeight: '100vh' }}>
 
       <div style={{
-        position: 'sticky',
-        top: 0,
-        backgroundColor: '#0a0a0a',
-        padding: '16px 20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: '1px solid #1a1a1a',
-        zIndex: 100
+        position: 'sticky', top: 0, backgroundColor: bgColor,
+        padding: '16px 20px', display: 'flex', justifyContent: 'space-between',
+        alignItems: 'center', borderBottom: '1px solid ' + borderColor, zIndex: 100
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: '#e85d04',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontWeight: 'bold',
-            fontSize: '16px'
-          }}>F</div>
-          <h2 style={{ color: 'white', margin: 0, fontSize: '18px' }}>Owner Dashboard</h2>
+          <Logo size={32} />
+          <h2 style={{ color: textColor, margin: 0, fontSize: '18px' }}>Owner Dashboard</h2>
         </div>
-        <button onClick={onLogout} style={{
-          backgroundColor: '#1a1a1a',
-          color: '#e85d04',
-          border: '1px solid #2a2a2a',
-          padding: '8px 16px',
-          borderRadius: '20px',
-          cursor: 'pointer',
-          fontSize: '13px'
-        }}>Logout</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={fetchData} style={{
+            backgroundColor: cardColor, color: textColor,
+            border: '1px solid ' + borderColor, padding: '8px 16px',
+            borderRadius: '20px', cursor: 'pointer', fontSize: '13px'
+          }}>{refreshing ? 'Refreshing...' : 'Refresh'}</button>
+          <button onClick={onLogout} style={{
+            backgroundColor: 'transparent', color: '#e85d04',
+            border: '1px solid #e85d04', padding: '8px 16px',
+            borderRadius: '20px', cursor: 'pointer', fontSize: '13px'
+          }}>Logout</button>
+        </div>
       </div>
 
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        padding: '16px 20px 0',
-        overflowX: 'auto'
-      }}>
-        {['overview', 'orders', 'popular', 'upload'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: '8px 20px',
-              borderRadius: '20px',
-              border: 'none',
-              backgroundColor: activeTab === tab ? '#e85d04' : '#1a1a1a',
-              color: activeTab === tab ? 'white' : '#888',
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontWeight: activeTab === tab ? 'bold' : 'normal',
-              whiteSpace: 'nowrap',
-              textTransform: 'capitalize'
-            }}>{tab}</button>
+      <div style={{ display: 'flex', gap: '8px', padding: '16px 20px 0', overflowX: 'auto' }}>
+        {['overview', 'orders', 'menu', 'add dish'].map(tab => (
+          <button key={tab} onClick={() => setActiveTab(tab)} style={{
+            padding: '8px 20px', borderRadius: '20px', border: 'none',
+            backgroundColor: activeTab === tab ? '#e85d04' : cardColor,
+            color: activeTab === tab ? 'white' : subtextColor,
+            cursor: 'pointer', fontSize: '13px',
+            fontWeight: activeTab === tab ? 'bold' : 'normal',
+            whiteSpace: 'nowrap', textTransform: 'capitalize'
+          }}>{tab}</button>
         ))}
       </div>
 
@@ -130,84 +131,36 @@ function OwnerDashboard({ onLogout }) {
         {activeTab === 'overview' && (
           <div className="fade-in">
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-              <div style={{
-                flex: 1,
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '16px',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
+              <div style={{ flex: 1, backgroundColor: cardColor, border: '1px solid ' + borderColor, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
                 <h3 style={{ color: '#e85d04', margin: 0, fontSize: '28px' }}>{orders.length}</h3>
-                <p style={{ color: '#888', margin: '4px 0 0', fontSize: '12px' }}>Total Orders</p>
+                <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '12px' }}>Total Orders</p>
               </div>
-              <div style={{
-                flex: 1,
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '16px',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
+              <div style={{ flex: 1, backgroundColor: cardColor, border: '1px solid ' + borderColor, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
                 <h3 style={{ color: '#2ecc71', margin: 0, fontSize: '22px' }}>Rs.{totalRevenue}</h3>
-                <p style={{ color: '#888', margin: '4px 0 0', fontSize: '12px' }}>Revenue</p>
+                <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '12px' }}>Revenue</p>
               </div>
             </div>
-
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-              <div style={{
-                flex: 1,
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '16px',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
+              <div style={{ flex: 1, backgroundColor: cardColor, border: '1px solid ' + borderColor, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
                 <h3 style={{ color: '#f39c12', margin: 0, fontSize: '24px' }}>Rs.{avgOrderValue}</h3>
-                <p style={{ color: '#888', margin: '4px 0 0', fontSize: '12px' }}>Avg Order</p>
+                <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '12px' }}>Avg Order</p>
               </div>
-              <div style={{
-                flex: 1,
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '16px',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
-                <h3 style={{ color: '#8e44ad', margin: 0, fontSize: '24px' }}>{popularDishes.length}</h3>
-                <p style={{ color: '#888', margin: '4px 0 0', fontSize: '12px' }}>Dishes Sold</p>
+              <div style={{ flex: 1, backgroundColor: cardColor, border: '1px solid ' + borderColor, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+                <h3 style={{ color: '#8e44ad', margin: 0, fontSize: '24px' }}>{reels.length}</h3>
+                <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '12px' }}>Total Dishes</p>
               </div>
             </div>
-
-            <div style={{
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #2a2a2a',
-              borderRadius: '16px',
-              padding: '20px'
-            }}>
-              <h3 style={{ color: 'white', margin: '0 0 16px', fontSize: '15px' }}>Revenue Bar Chart</h3>
-              {popularDishes.length === 0 && (
-                <p style={{ color: '#555', textAlign: 'center' }}>No data yet</p>
-              )}
+            <div style={{ backgroundColor: cardColor, border: '1px solid ' + borderColor, borderRadius: '16px', padding: '20px' }}>
+              <h3 style={{ color: textColor, margin: '0 0 16px', fontSize: '15px' }}>Popular Dishes</h3>
+              {popularDishes.length === 0 && <p style={{ color: subtextColor, textAlign: 'center' }}>No orders yet</p>}
               {popularDishes.map(([dish, count], index) => (
                 <div key={index} style={{ marginBottom: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <p style={{ color: 'white', margin: 0, fontSize: '13px' }}>{dish}</p>
+                    <p style={{ color: textColor, margin: 0, fontSize: '13px' }}>{dish}</p>
                     <p style={{ color: '#e85d04', margin: 0, fontSize: '13px', fontWeight: 'bold' }}>{count} orders</p>
                   </div>
-                  <div style={{
-                    backgroundColor: '#2a2a2a',
-                    borderRadius: '10px',
-                    height: '8px',
-                    overflow: 'hidden'
-                  }}>
-                    <div style={{
-                      backgroundColor: '#e85d04',
-                      height: '100%',
-                      width: (count / (popularDishes[0][1]) * 100) + '%',
-                      borderRadius: '10px',
-                      transition: 'width 0.5s ease'
-                    }}></div>
+                  <div style={{ backgroundColor: borderColor, borderRadius: '10px', height: '8px', overflow: 'hidden' }}>
+                    <div style={{ backgroundColor: '#e85d04', height: '100%', width: (count / popularDishes[0][1] * 100) + '%', borderRadius: '10px' }}></div>
                   </div>
                 </div>
               ))}
@@ -217,149 +170,125 @@ function OwnerDashboard({ onLogout }) {
 
         {activeTab === 'orders' && (
           <div className="fade-in">
-            <h3 style={{ color: 'white', marginBottom: '16px', fontSize: '16px' }}>Recent Orders</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ color: textColor, margin: 0, fontSize: '16px' }}>All Customer Orders ({orders.length})</h3>
+              <button onClick={fetchData} style={{ backgroundColor: '#e85d04', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px' }}>Refresh</button>
+            </div>
             {loading && (
               <div style={{ textAlign: 'center' }}>
-                <div className="spin" style={{
-                  width: '30px',
-                  height: '30px',
-                  border: '3px solid #333',
-                  borderTop: '3px solid #e85d04',
-                  borderRadius: '50%',
-                  margin: '0 auto'
-                }}></div>
+                <div className="spin" style={{ width: '30px', height: '30px', border: '3px solid ' + borderColor, borderTop: '3px solid #e85d04', borderRadius: '50%', margin: '0 auto' }}></div>
               </div>
             )}
             {!loading && orders.length === 0 && (
-              <div style={{
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '16px',
-                padding: '40px',
-                textAlign: 'center'
-              }}>
-                <p style={{ color: '#888', margin: 0 }}>No orders yet!</p>
+              <div style={{ backgroundColor: cardColor, border: '1px solid ' + borderColor, borderRadius: '16px', padding: '40px', textAlign: 'center' }}>
+                <p style={{ color: subtextColor, margin: 0 }}>No orders yet!</p>
+                <p style={{ color: subtextColor, margin: '8px 0 0', fontSize: '14px' }}>Orders will appear here when customers order</p>
               </div>
             )}
             {orders.map((order, index) => (
-              <div key={order.id} className="slide-in" style={{
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '12px',
-                padding: '16px',
-                marginBottom: '10px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+              <div key={index} className="slide-in" style={{
+                backgroundColor: cardColor, border: '1px solid ' + borderColor,
+                borderRadius: '12px', padding: '16px', marginBottom: '10px',
                 animationDelay: index * 0.05 + 's'
               }}>
-                <div>
-                  <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{order.dish}</p>
-                  <p style={{ color: '#888', margin: '4px 0 0', fontSize: '13px' }}>{order.customer}</p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ color: '#2ecc71', fontWeight: 'bold', margin: 0 }}>Rs. {order.price}</p>
-                  <p style={{ color: '#e85d04', margin: '4px 0 0', fontSize: '12px' }}>{order.status}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{order.dish}</p>
+                    <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>Customer: {order.customer}</p>
+                    <p style={{ color: subtextColor, margin: '2px 0 0', fontSize: '12px' }}>Restaurant: {order.restaurant || 'N/A'}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ color: '#2ecc71', fontWeight: 'bold', margin: 0 }}>Rs. {order.price}</p>
+                    <p style={{ color: '#e85d04', margin: '4px 0 0', fontSize: '12px' }}>{order.status}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {activeTab === 'popular' && (
+        {activeTab === 'menu' && (
           <div className="fade-in">
-            <h3 style={{ color: 'white', marginBottom: '16px', fontSize: '16px' }}>Popular Dishes</h3>
-            {popularDishes.length === 0 && (
-              <div style={{
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '16px',
-                padding: '40px',
-                textAlign: 'center'
-              }}>
-                <p style={{ color: '#888', margin: 0 }}>No data yet!</p>
-              </div>
-            )}
-            {popularDishes.map(([dish, count], index) => (
+            <h3 style={{ color: textColor, marginBottom: '16px', fontSize: '16px' }}>All Menu Items ({reels.length})</h3>
+            {reels.map((reel, index) => (
               <div key={index} className="slide-in" style={{
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '12px',
-                padding: '16px',
-                marginBottom: '10px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                animationDelay: index * 0.1 + 's'
+                backgroundColor: cardColor, border: '1px solid ' + borderColor,
+                borderRadius: '12px', padding: '16px', marginBottom: '10px',
+                display: 'flex', alignItems: 'center', gap: '12px',
+                animationDelay: index * 0.05 + 's'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{
-                    width: '36px',
-                    height: '36px',
-                    backgroundColor: index === 0 ? '#f39c12' : index === 1 ? '#888' : '#cd7f32',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '16px'
-                  }}>#{index + 1}</div>
-                  <p style={{ color: 'white', fontWeight: 'bold', margin: 0 }}>{dish}</p>
+                <div style={{ width: '44px', height: '44px', backgroundColor: reel.color, borderRadius: '10px', flexShrink: 0 }}></div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{reel.dish}</p>
+                  <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>{reel.restaurant}</p>
                 </div>
-                <div style={{
-                  backgroundColor: '#e85d04',
-                  color: 'white',
-                  padding: '4px 12px',
-                  borderRadius: '20px',
-                  fontSize: '13px',
-                  fontWeight: 'bold'
-                }}>{count} orders</div>
+                <p style={{ color: '#2ecc71', fontWeight: 'bold', margin: 0 }}>Rs. {reel.price}</p>
               </div>
             ))}
           </div>
         )}
 
-        {activeTab === 'upload' && (
+        {activeTab === 'add dish' && (
           <div className="fade-in">
-            <div style={{
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #2a2a2a',
-              borderRadius: '16px',
-              padding: '20px'
-            }}>
-              <h3 style={{ color: 'white', margin: '0 0 16px', fontSize: '16px' }}>Upload New Reel</h3>
+            <div style={{ backgroundColor: cardColor, border: '1px solid ' + borderColor, borderRadius: '16px', padding: '20px' }}>
+              <h3 style={{ color: textColor, margin: '0 0 8px', fontSize: '16px' }}>Add Your Restaurant Dish</h3>
+              <p style={{ color: subtextColor, margin: '0 0 16px', fontSize: '13px' }}>Your dish will appear on the home feed for all customers!</p>
 
               {message && (
                 <div className="fade-in" style={{
                   backgroundColor: message.includes('success') ? '#1a2a1a' : '#2a1a1a',
                   border: '1px solid ' + (message.includes('success') ? '#2ecc71' : '#e85d04'),
-                  borderRadius: '8px',
-                  padding: '10px',
-                  marginBottom: '12px',
+                  borderRadius: '8px', padding: '10px', marginBottom: '12px',
                   color: message.includes('success') ? '#2ecc71' : '#e85d04',
-                  fontSize: '13px',
-                  textAlign: 'center'
+                  fontSize: '13px', textAlign: 'center'
                 }}>{message}</div>
               )}
 
               <input
-                placeholder="Dish name"
-                value={dish}
-                onChange={(e) => setDish(e.target.value)}
-                style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '10px', border: '1px solid #2a2a2a', backgroundColor: '#2a2a2a', color: 'white', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}
+                placeholder="Your Restaurant Name (e.g. Gaurav's Kitchen)"
+                value={restaurant}
+                onChange={(e) => setRestaurant(e.target.value)}
+                style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '10px', border: '1px solid ' + borderColor, backgroundColor: theme ? theme.input : '#2a2a2a', color: textColor, fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}
               />
               <input
-                placeholder="Price (Rs.)"
+                placeholder="Dish Name (e.g. Special Biryani)"
+                value={dish}
+                onChange={(e) => setDish(e.target.value)}
+                style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '10px', border: '1px solid ' + borderColor, backgroundColor: theme ? theme.input : '#2a2a2a', color: textColor, fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}
+              />
+              <input
+                placeholder="Price in Rs. (e.g. 250)"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '10px', border: '1px solid #2a2a2a', backgroundColor: '#2a2a2a', color: 'white', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}
+                type="number"
+                style={{ width: '100%', padding: '12px', marginBottom: '16px', borderRadius: '10px', border: '1px solid ' + borderColor, backgroundColor: theme ? theme.input : '#2a2a2a', color: textColor, fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}
               />
-              <button
-                onClick={handleUpload}
-                style={{ width: '100%', padding: '12px', backgroundColor: '#e85d04', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer' }}>
-                Upload Reel
-              </button>
+
+              <p style={{ color: subtextColor, margin: '0 0 8px', fontSize: '13px' }}>Choose card color:</p>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                {colorOptions.map(c => (
+                  <div key={c} onClick={() => setColor(c)} style={{
+                    width: '36px', height: '36px', backgroundColor: c,
+                    borderRadius: '8px', cursor: 'pointer',
+                    border: color === c ? '3px solid white' : '3px solid transparent'
+                  }}></div>
+                ))}
+              </div>
+
+              <div style={{ backgroundColor: theme ? theme.input : '#2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                <p style={{ color: subtextColor, margin: '0 0 8px', fontSize: '12px' }}>Preview:</p>
+                <div style={{ backgroundColor: color, borderRadius: '10px', padding: '20px', textAlign: 'center' }}>
+                  <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '16px' }}>{dish || 'Dish Name'}</p>
+                  <p style={{ color: 'white', margin: '4px 0 0', fontSize: '14px' }}>{restaurant || 'Restaurant Name'}</p>
+                  <p style={{ color: 'white', margin: '4px 0 0', fontWeight: 'bold' }}>Rs. {price || '0'}</p>
+                </div>
+              </div>
+
+              <button onClick={handleUpload} style={{
+                width: '100%', padding: '14px', backgroundColor: '#e85d04',
+                color: 'white', border: 'none', borderRadius: '10px',
+                fontSize: '15px', fontWeight: 'bold', cursor: 'pointer'
+              }}>Add Dish to FoodReels Home Page</button>
             </div>
           </div>
         )}
