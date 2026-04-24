@@ -7,7 +7,12 @@ import Profile from './Profile';
 import Cart from './Cart';
 import Splash from './Splash';
 import Notifications from './Notifications';
-import Map from './Map';
+import RestaurantPage from './RestaurantPage';
+import OrderTracking from './OrderTracking';
+import Favorites from './Favorites';
+import Reviews from './Reviews';
+import Chatbot from './Chatbot';
+import FollowedRestaurants from './FollowedRestaurants';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -15,6 +20,21 @@ function App() {
   const [cart, setCart] = useState([]);
   const [role, setRole] = useState('user');
   const [notifications, setNotifications] = useState([]);
+  const [selectedRestaurant, setSelectedRestaurant] = useState('');
+  const [favorites, setFavorites] = useState([]);
+  const [selectedReel, setSelectedReel] = useState(null);
+  const [darkMode, setDarkMode] = useState(true);
+  const [followed, setFollowed] = useState([]);
+
+  const theme = {
+    bg: darkMode ? '#0a0a0a' : '#f5f5f5',
+    card: darkMode ? '#1a1a1a' : '#ffffff',
+    border: darkMode ? '#2a2a2a' : '#e0e0e0',
+    text: darkMode ? 'white' : '#1a1a1a',
+    subtext: darkMode ? '#888' : '#666',
+    input: darkMode ? '#2a2a2a' : '#f0f0f0',
+    accent: '#e85d04'
+  };
 
   const addNotification = (title, message, type) => {
     const time = new Date().toLocaleTimeString();
@@ -23,7 +43,7 @@ function App() {
 
   const addToCart = (reel) => {
     setCart([...cart, reel]);
-    addNotification('Added to cart!', `${reel.dish} added to your cart`, 'cart');
+    addNotification('Added to cart!', reel.dish + ' added to your cart', 'cart');
   };
 
   const removeFromCart = (index) => {
@@ -31,18 +51,51 @@ function App() {
     setCart(newCart);
   };
 
-  const checkout = async () => {
+  const toggleFavorite = (reel) => {
+    const exists = favorites.find(f => f.id === reel.id);
+    if (exists) {
+      setFavorites(favorites.filter(f => f.id !== reel.id));
+    } else {
+      setFavorites([...favorites, reel]);
+      addNotification('Added to favorites!', reel.dish + ' saved to favorites', 'fav');
+    }
+  };
+
+  const removeFromFavorites = (id) => {
+    setFavorites(favorites.filter(f => f.id !== id));
+  };
+
+  const toggleFollow = (restaurant) => {
+    if (followed.includes(restaurant)) {
+      setFollowed(followed.filter(r => r !== restaurant));
+    } else {
+      setFollowed([...followed, restaurant]);
+      addNotification('Following!', 'You are now following ' + restaurant, 'follow');
+    }
+  };
+
+  const checkout = async (total) => {
+    if (!userEmail) {
+      alert('Please login first!');
+      return;
+    }
     try {
       for (const item of cart) {
         await fetch('https://foodreels-backend.onrender.com/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dish: item.dish, price: item.price, customer: userEmail || 'Test User' })
+          body: JSON.stringify({
+            dish: item.dish,
+            price: item.price,
+            customer: userEmail,
+            restaurant: item.restaurant || 'Unknown'
+          })
         });
       }
-      addNotification('Order placed!', `Your order of ${cart.length} items has been placed`, 'order');
+      addNotification('Order placed!', 'Your order of ' + cart.length + ' items has been placed', 'order');
       setCart([]);
-      setPage('feed');
+      setPage('tracking');
+      alert('Order placed successfully!');
     } catch (error) {
       alert('Error placing order!');
     }
@@ -51,138 +104,178 @@ function App() {
   const isLoggedIn = page !== 'login' && page !== 'register' && page !== 'splash';
 
   return (
-    <div style={{ paddingBottom: isLoggedIn && role === 'user' ? '70px' : '0' }}>
+    <div style={{ backgroundColor: theme.bg, minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
 
-      {page === 'splash' && <Splash onDone={() => setPage('login')} />}
-      {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} />}
-      {page === 'register' && <Register onSwitch={() => setPage('login')} />}
-      {page === 'feed' && <Feed onLogout={() => { setPage('login'); setCart([]); }} onProfile={() => setPage('profile')} onCart={() => setPage('cart')} onNotifications={() => setPage('notifications')} onMap={() => setPage('map')} cartCount={cart.length} notifCount={notifications.length} addToCart={addToCart} />}
-      {page === 'profile' && <Profile onLogout={() => { setPage('login'); setCart([]); }} userEmail={userEmail} onBack={() => setPage('feed')} />}
-      {page === 'cart' && <Cart cart={cart} onRemove={removeFromCart} onCheckout={checkout} onBack={() => setPage('feed')} />}
-      {page === 'notifications' && <Notifications notifications={notifications} onBack={() => setPage('feed')} onClear={() => setNotifications([])} />}
-      {page === 'map' && <Map onBack={() => setPage('feed')} />}
-      {page === 'owner' && <OwnerDashboard onLogout={() => setPage('login')} />}
+      {page === 'splash' && <Splash onDone={() => setPage('login')} theme={theme} />}
+      {page === 'login' && <Login onSwitch={() => setPage('register')} onLogin={(r, email) => { setUserEmail(email); setRole(r); setPage(r === 'owner' ? 'owner' : 'feed'); }} theme={theme} />}
+      {page === 'register' && <Register onSwitch={() => setPage('login')} theme={theme} />}
+      {page === 'feed' && <Feed
+        onLogout={() => { setPage('login'); setCart([]); }}
+        onProfile={() => setPage('profile')}
+        onCart={() => setPage('cart')}
+        onNotifications={() => setPage('notifications')}
+        onFavorites={() => setPage('favorites')}
+        cartCount={cart.length}
+        notifCount={notifications.length}
+        addToCart={addToCart}
+        onRestaurant={(name) => { setSelectedRestaurant(name); setPage('restaurant'); }}
+        favorites={favorites}
+        toggleFavorite={toggleFavorite}
+        onReviews={(reel) => { setSelectedReel(reel); setPage('reviews'); }}
+        theme={theme}
+        followed={followed}
+        toggleFollow={toggleFollow}
+      />}
+      {page === 'profile' && <Profile
+        onLogout={() => { setPage('login'); setCart([]); }}
+        userEmail={userEmail}
+        onBack={() => setPage('feed')}
+        theme={theme}
+        darkMode={darkMode}
+        toggleDarkMode={() => setDarkMode(!darkMode)}
+        onFollowing={() => setPage('following')}
+        followedCount={followed.length}
+      />}
+      {page === 'cart' && <Cart
+        cart={cart}
+        onRemove={removeFromCart}
+        onCheckout={checkout}
+        onBack={() => setPage('feed')}
+        theme={theme}
+      />}
+      {page === 'notifications' && <Notifications
+        notifications={notifications}
+        onBack={() => setPage('feed')}
+        onClear={() => setNotifications([])}
+        theme={theme}
+      />}
+      {page === 'restaurant' && <RestaurantPage
+        restaurant={selectedRestaurant}
+        onBack={() => setPage('feed')}
+        addToCart={addToCart}
+        theme={theme}
+      />}
+      {page === 'tracking' && <OrderTracking
+        onBack={() => setPage('feed')}
+        userEmail={userEmail}
+        theme={theme}
+      />}
+      {page === 'favorites' && <Favorites
+        favorites={favorites}
+        onRemove={removeFromFavorites}
+        addToCart={addToCart}
+        onBack={() => setPage('feed')}
+        theme={theme}
+      />}
+      {page === 'reviews' && <Reviews
+        reel={selectedReel}
+        userEmail={userEmail}
+        onBack={() => setPage('feed')}
+        theme={theme}
+      />}
+      {page === 'chatbot' && <Chatbot
+        onBack={() => setPage('feed')}
+        userEmail={userEmail}
+        theme={theme}
+      />}
+      {page === 'following' && <FollowedRestaurants
+        followed={followed}
+        onUnfollow={(r) => toggleFollow(r)}
+        onBack={() => setPage('profile')}
+        theme={theme}
+        addToCart={addToCart}
+      />}
+      {page === 'owner' && <OwnerDashboard
+        onLogout={() => setPage('login')}
+        theme={theme}
+        ownerEmail={userEmail}
+      />}
 
       {isLoggedIn && role === 'user' && (
         <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: '#0a0a0a',
-          borderTop: '1px solid #1a1a1a',
-          display: 'flex',
-          justifyContent: 'space-around',
-          padding: '12px 0',
-          zIndex: 200
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          backgroundColor: theme.card,
+          borderTop: '1px solid ' + theme.border,
+          display: 'flex', justifyContent: 'space-around',
+          padding: '12px 0', zIndex: 200,
+          transition: 'background-color 0.3s ease'
         }}>
           <button onClick={() => setPage('feed')} style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: page === 'feed' ? '#e85d04' : '#888',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'feed' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '4px', fontSize: '11px',
             fontWeight: page === 'feed' ? 'bold' : 'normal'
           }}>
-            <div style={{ fontSize: '20px' }}>Home</div>
-          </button>
-
-          <button onClick={() => setPage('map')} style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: page === 'map' ? '#e85d04' : '#888',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
-            fontWeight: page === 'map' ? 'bold' : 'normal'
-          }}>
-            <div style={{ fontSize: '20px' }}>Map</div>
+            <div style={{ fontSize: '18px' }}>Home</div>
           </button>
 
           <button onClick={() => setPage('cart')} style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: page === 'cart' ? '#e85d04' : '#888',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
-            fontWeight: page === 'cart' ? 'bold' : 'normal',
-            position: 'relative'
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'cart' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '4px', fontSize: '11px',
+            fontWeight: page === 'cart' ? 'bold' : 'normal', position: 'relative'
           }}>
-            <div style={{ fontSize: '20px' }}>Cart</div>
+            <div style={{ fontSize: '18px' }}>Cart</div>
             {cart.length > 0 && (
               <div style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                backgroundColor: '#e85d04',
-                color: 'white',
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                fontSize: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                position: 'absolute', top: '-4px', right: '-4px',
+                backgroundColor: '#e85d04', color: 'white',
+                borderRadius: '50%', width: '16px', height: '16px',
+                fontSize: '10px', display: 'flex',
+                alignItems: 'center', justifyContent: 'center'
               }}>{cart.length}</div>
             )}
           </button>
 
-          <button onClick={() => setPage('notifications')} style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: page === 'notifications' ? '#e85d04' : '#888',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
-            fontWeight: page === 'notifications' ? 'bold' : 'normal',
-            position: 'relative'
+          <button onClick={() => setPage('chatbot')} style={{
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'chatbot' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '4px', fontSize: '11px',
+            fontWeight: page === 'chatbot' ? 'bold' : 'normal'
           }}>
-            <div style={{ fontSize: '20px' }}>Notif</div>
-            {notifications.length > 0 && (
+            <div style={{ fontSize: '18px' }}>Bot</div>
+          </button>
+
+          <button onClick={() => setPage('favorites')} style={{
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'favorites' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '4px', fontSize: '11px',
+            fontWeight: page === 'favorites' ? 'bold' : 'normal', position: 'relative'
+          }}>
+            <div style={{ fontSize: '18px' }}>Saved</div>
+            {favorites.length > 0 && (
               <div style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                backgroundColor: '#e85d04',
-                color: 'white',
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                fontSize: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>{notifications.length}</div>
+                position: 'absolute', top: '-4px', right: '-4px',
+                backgroundColor: '#ff4d4d', color: 'white',
+                borderRadius: '50%', width: '16px', height: '16px',
+                fontSize: '10px', display: 'flex',
+                alignItems: 'center', justifyContent: 'center'
+              }}>{favorites.length}</div>
             )}
           </button>
 
+          <button onClick={() => setPage('tracking')} style={{
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'tracking' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '4px', fontSize: '11px',
+            fontWeight: page === 'tracking' ? 'bold' : 'normal'
+          }}>
+            <div style={{ fontSize: '18px' }}>Orders</div>
+          </button>
+
           <button onClick={() => setPage('profile')} style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: page === 'profile' ? '#e85d04' : '#888',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'profile' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '4px', fontSize: '11px',
             fontWeight: page === 'profile' ? 'bold' : 'normal'
           }}>
-            <div style={{ fontSize: '20px' }}>Profile</div>
+            <div style={{ fontSize: '18px' }}>Profile</div>
           </button>
         </div>
       )}
