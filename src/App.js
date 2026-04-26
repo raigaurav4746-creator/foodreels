@@ -13,6 +13,7 @@ import Favorites from './Favorites';
 import Reviews from './Reviews';
 import Chatbot from './Chatbot';
 import FollowedRestaurants from './FollowedRestaurants';
+import Complaint from './Complaint';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -185,6 +186,11 @@ function App() {
         theme={theme}
         addToCart={addToCart}
       />}
+      {page === 'complaint' && <Complaint
+        onBack={() => setPage('feed')}
+        userEmail={userEmail}
+        theme={theme}
+      />}
       {page === 'owner' && <OwnerDashboard
         onLogout={() => setPage('login')}
         theme={theme}
@@ -266,6 +272,16 @@ function App() {
             fontWeight: page === 'tracking' ? 'bold' : 'normal'
           }}>
             <div style={{ fontSize: '18px' }}>Orders</div>
+          </button>
+
+          <button onClick={() => setPage('complaint')} style={{
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'complaint' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '4px', fontSize: '11px',
+            fontWeight: page === 'complaint' ? 'bold' : 'normal'
+          }}>
+            <div style={{ fontSize: '18px' }}>Help</div>
           </button>
 
           <button onClick={() => setPage('profile')} style={{
