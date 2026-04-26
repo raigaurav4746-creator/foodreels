@@ -203,30 +203,33 @@ function App() {
           backgroundColor: theme.card,
           borderTop: '1px solid ' + theme.border,
           display: 'flex', justifyContent: 'space-around',
-          padding: '12px 0', zIndex: 200,
+          padding: '8px 0 12px', zIndex: 200,
           transition: 'background-color 0.3s ease'
         }}>
           <button onClick={() => setPage('feed')} style={{
             backgroundColor: 'transparent', border: 'none',
             color: page === 'feed' ? '#e85d04' : theme.subtext,
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '4px', fontSize: '11px',
-            fontWeight: page === 'feed' ? 'bold' : 'normal'
+            alignItems: 'center', gap: '2px', fontSize: '10px',
+            fontWeight: page === 'feed' ? 'bold' : 'normal', flex: 1
           }}>
-            <div style={{ fontSize: '18px' }}>Home</div>
+            <div style={{ fontSize: '22px' }}>🏠</div>
+            <div>Home</div>
           </button>
 
           <button onClick={() => setPage('cart')} style={{
             backgroundColor: 'transparent', border: 'none',
             color: page === 'cart' ? '#e85d04' : theme.subtext,
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '4px', fontSize: '11px',
-            fontWeight: page === 'cart' ? 'bold' : 'normal', position: 'relative'
+            alignItems: 'center', gap: '2px', fontSize: '10px',
+            fontWeight: page === 'cart' ? 'bold' : 'normal',
+            position: 'relative', flex: 1
           }}>
-            <div style={{ fontSize: '18px' }}>Cart</div>
+            <div style={{ fontSize: '22px' }}>🛒</div>
+            <div>Cart</div>
             {cart.length > 0 && (
               <div style={{
-                position: 'absolute', top: '-4px', right: '-4px',
+                position: 'absolute', top: '0px', right: '18px',
                 backgroundColor: '#e85d04', color: 'white',
                 borderRadius: '50%', width: '16px', height: '16px',
                 fontSize: '10px', display: 'flex',
@@ -235,63 +238,37 @@ function App() {
             )}
           </button>
 
-          <button onClick={() => setPage('chatbot')} style={{
-            backgroundColor: 'transparent', border: 'none',
-            color: page === 'chatbot' ? '#e85d04' : theme.subtext,
-            cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '4px', fontSize: '11px',
-            fontWeight: page === 'chatbot' ? 'bold' : 'normal'
-          }}>
-            <div style={{ fontSize: '18px' }}>Bot</div>
-          </button>
-
-          <button onClick={() => setPage('favorites')} style={{
-            backgroundColor: 'transparent', border: 'none',
-            color: page === 'favorites' ? '#e85d04' : theme.subtext,
-            cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '4px', fontSize: '11px',
-            fontWeight: page === 'favorites' ? 'bold' : 'normal', position: 'relative'
-          }}>
-            <div style={{ fontSize: '18px' }}>Saved</div>
-            {favorites.length > 0 && (
-              <div style={{
-                position: 'absolute', top: '-4px', right: '-4px',
-                backgroundColor: '#ff4d4d', color: 'white',
-                borderRadius: '50%', width: '16px', height: '16px',
-                fontSize: '10px', display: 'flex',
-                alignItems: 'center', justifyContent: 'center'
-              }}>{favorites.length}</div>
-            )}
-          </button>
-
           <button onClick={() => setPage('tracking')} style={{
             backgroundColor: 'transparent', border: 'none',
             color: page === 'tracking' ? '#e85d04' : theme.subtext,
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '4px', fontSize: '11px',
-            fontWeight: page === 'tracking' ? 'bold' : 'normal'
+            alignItems: 'center', gap: '2px', fontSize: '10px',
+            fontWeight: page === 'tracking' ? 'bold' : 'normal', flex: 1
           }}>
-            <div style={{ fontSize: '18px' }}>Orders</div>
+            <div style={{ fontSize: '22px' }}>📦</div>
+            <div>Orders</div>
           </button>
 
           <button onClick={() => setPage('complaint')} style={{
             backgroundColor: 'transparent', border: 'none',
             color: page === 'complaint' ? '#e85d04' : theme.subtext,
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '4px', fontSize: '11px',
-            fontWeight: page === 'complaint' ? 'bold' : 'normal'
+            alignItems: 'center', gap: '2px', fontSize: '10px',
+            fontWeight: page === 'complaint' ? 'bold' : 'normal', flex: 1
           }}>
-            <div style={{ fontSize: '18px' }}>Help</div>
+            <div style={{ fontSize: '22px' }}>🆘</div>
+            <div>Help</div>
           </button>
 
           <button onClick={() => setPage('profile')} style={{
             backgroundColor: 'transparent', border: 'none',
             color: page === 'profile' ? '#e85d04' : theme.subtext,
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '4px', fontSize: '11px',
-            fontWeight: page === 'profile' ? 'bold' : 'normal'
+            alignItems: 'center', gap: '2px', fontSize: '10px',
+            fontWeight: page === 'profile' ? 'bold' : 'normal', flex: 1
           }}>
-            <div style={{ fontSize: '18px' }}>Profile</div>
+            <div style={{ fontSize: '22px' }}>👤</div>
+            <div>Profile</div>
           </button>
         </div>
       )}
