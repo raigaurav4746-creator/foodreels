@@ -136,6 +136,8 @@ function App() {
         toggleDarkMode={() => setDarkMode(!darkMode)}
         onFollowing={() => setPage('following')}
         followedCount={followed.length}
+        onFavorites={() => setPage('favorites')}
+        favoritesCount={favorites.length}
       />}
       {page === 'cart' && <Cart
         cart={cart}
@@ -165,7 +167,7 @@ function App() {
         favorites={favorites}
         onRemove={removeFromFavorites}
         addToCart={addToCart}
-        onBack={() => setPage('feed')}
+        onBack={() => setPage('profile')}
         theme={theme}
       />}
       {page === 'reviews' && <Reviews
@@ -175,7 +177,7 @@ function App() {
         theme={theme}
       />}
       {page === 'chatbot' && <Chatbot
-        onBack={() => setPage('feed')}
+        onBack={() => setPage('complaint')}
         userEmail={userEmail}
         theme={theme}
       />}
@@ -190,6 +192,7 @@ function App() {
         onBack={() => setPage('feed')}
         userEmail={userEmail}
         theme={theme}
+        onChatbot={() => setPage('chatbot')}
       />}
       {page === 'owner' && <OwnerDashboard
         onLogout={() => setPage('login')}
@@ -251,10 +254,10 @@ function App() {
 
           <button onClick={() => setPage('complaint')} style={{
             backgroundColor: 'transparent', border: 'none',
-            color: page === 'complaint' ? '#e85d04' : theme.subtext,
+            color: page === 'complaint' || page === 'chatbot' ? '#e85d04' : theme.subtext,
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
             alignItems: 'center', gap: '2px', fontSize: '10px',
-            fontWeight: page === 'complaint' ? 'bold' : 'normal', flex: 1
+            fontWeight: page === 'complaint' || page === 'chatbot' ? 'bold' : 'normal', flex: 1
           }}>
             <div style={{ fontSize: '22px' }}>🆘</div>
             <div>Help</div>
@@ -262,10 +265,10 @@ function App() {
 
           <button onClick={() => setPage('profile')} style={{
             backgroundColor: 'transparent', border: 'none',
-            color: page === 'profile' ? '#e85d04' : theme.subtext,
+            color: page === 'profile' || page === 'favorites' || page === 'following' ? '#e85d04' : theme.subtext,
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
             alignItems: 'center', gap: '2px', fontSize: '10px',
-            fontWeight: page === 'profile' ? 'bold' : 'normal', flex: 1
+            fontWeight: page === 'profile' || page === 'favorites' || page === 'following' ? 'bold' : 'normal', flex: 1
           }}>
             <div style={{ fontSize: '22px' }}>👤</div>
             <div>Profile</div>

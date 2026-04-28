@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function Complaint({ onBack, userEmail, theme }) {
+function Complaint({ onBack, userEmail, theme, onChatbot }) {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -91,6 +91,12 @@ function Complaint({ onBack, userEmail, theme }) {
           }}>Back</button>
           <h2 style={{ color: textColor, margin: 0, fontSize: '18px' }}>Help & Support</h2>
         </div>
+        <button onClick={onChatbot} style={{
+          backgroundColor: '#e85d04', color: 'white',
+          border: 'none', padding: '8px 16px',
+          borderRadius: '20px', cursor: 'pointer', fontSize: '13px',
+          fontWeight: 'bold'
+        }}>🤖 Ask Bot</button>
       </div>
 
       <div style={{ display: 'flex', gap: '8px', padding: '16px 20px 0' }}>
@@ -110,13 +116,31 @@ function Complaint({ onBack, userEmail, theme }) {
 
         {activeTab === 'submit' && (
           <div className="fade-in">
+
+            <div style={{
+              backgroundColor: '#e85d04', borderRadius: '16px',
+              padding: '16px 20px', marginBottom: '16px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              cursor: 'pointer'
+            }} onClick={onChatbot}>
+              <div>
+                <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '15px' }}>
+                  🤖 Chat with FoodBot
+                </p>
+                <p style={{ color: 'rgba(255,255,255,0.8)', margin: '4px 0 0', fontSize: '13px' }}>
+                  Get instant help from our AI assistant!
+                </p>
+              </div>
+              <span style={{ color: 'white', fontSize: '20px' }}>›</span>
+            </div>
+
             <div style={{
               backgroundColor: cardColor, border: '1px solid ' + borderColor,
               borderRadius: '20px', padding: '20px', marginBottom: '16px'
             }}>
               <h3 style={{ color: textColor, margin: '0 0 8px', fontSize: '16px' }}>Report a Problem</h3>
               <p style={{ color: subtextColor, margin: '0 0 20px', fontSize: '14px' }}>
-                We are here to help! Tell us what went wrong and we will fix it.
+                Tell us what went wrong and we will fix it quickly!
               </p>
 
               {submitMessage && (
