@@ -14,6 +14,7 @@ import Reviews from './Reviews';
 import Chatbot from './Chatbot';
 import FollowedRestaurants from './FollowedRestaurants';
 import Complaint from './Complaint';
+import SpinWheel from './SpinWheel';
 
 function App() {
   const [page, setPage] = useState('splash');
@@ -116,6 +117,7 @@ function App() {
         onCart={() => setPage('cart')}
         onNotifications={() => setPage('notifications')}
         onFavorites={() => setPage('favorites')}
+        onSpin={() => setPage('spin')}
         cartCount={cart.length}
         notifCount={notifications.length}
         addToCart={addToCart}
@@ -194,6 +196,10 @@ function App() {
         theme={theme}
         onChatbot={() => setPage('chatbot')}
       />}
+      {page === 'spin' && <SpinWheel
+        onBack={() => setPage('feed')}
+        theme={theme}
+      />}
       {page === 'owner' && <OwnerDashboard
         onLogout={() => setPage('login')}
         theme={theme}
@@ -241,6 +247,17 @@ function App() {
             )}
           </button>
 
+          <button onClick={() => setPage('spin')} style={{
+            backgroundColor: 'transparent', border: 'none',
+            color: page === 'spin' ? '#e85d04' : theme.subtext,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '2px', fontSize: '10px',
+            fontWeight: page === 'spin' ? 'bold' : 'normal', flex: 1
+          }}>
+            <div style={{ fontSize: '22px' }}>🎰</div>
+            <div>Spin</div>
+          </button>
+
           <button onClick={() => setPage('tracking')} style={{
             backgroundColor: 'transparent', border: 'none',
             color: page === 'tracking' ? '#e85d04' : theme.subtext,
@@ -250,17 +267,6 @@ function App() {
           }}>
             <div style={{ fontSize: '22px' }}>📦</div>
             <div>Orders</div>
-          </button>
-
-          <button onClick={() => setPage('complaint')} style={{
-            backgroundColor: 'transparent', border: 'none',
-            color: page === 'complaint' || page === 'chatbot' ? '#e85d04' : theme.subtext,
-            cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '2px', fontSize: '10px',
-            fontWeight: page === 'complaint' || page === 'chatbot' ? 'bold' : 'normal', flex: 1
-          }}>
-            <div style={{ fontSize: '22px' }}>🆘</div>
-            <div>Help</div>
           </button>
 
           <button onClick={() => setPage('profile')} style={{
