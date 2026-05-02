@@ -5,6 +5,8 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [shareMessage, setShareMessage] = useState('');
+  const [points, setPoints] = useState(0);
+  const [referralCode, setReferralCode] = useState('');
 
   const bgColor = theme ? theme.bg : '#0a0a0a';
   const cardColor = theme ? theme.card : '#1a1a1a';
@@ -24,20 +26,31 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
         console.log(err);
         setLoading(false);
       });
+
+    fetch('https://foodreels-backend.onrender.com/user/' + userEmail)
+      .then(res => res.json())
+      .then(data => {
+        setPoints(data.points || 0);
+        setReferralCode(data.referralCode || '');
+      })
+      .catch(err => console.log(err));
   }, [userEmail]);
 
   const totalSpent = orders.reduce((sum, order) => sum + order.price, 0);
+  const pointsToNextReward = 100 - (points % 100);
+  const rewards = Math.floor(points / 100);
 
   const handleShare = () => {
+    const message = 'Join FoodReels and get 25 bonus points! Use my referral code: ' + referralCode + ' at signup. Download now: https://foodreels-numa.vercel.app';
     if (navigator.share) {
       navigator.share({
         title: 'FoodReels',
-        text: 'Discover food. Get hungry. Order now.',
+        text: message,
         url: 'https://foodreels-numa.vercel.app'
       });
     } else {
-      navigator.clipboard.writeText('https://foodreels-numa.vercel.app');
-      setShareMessage('Link copied to clipboard!');
+      navigator.clipboard.writeText(message);
+      setShareMessage('Referral link copied to clipboard!');
       setTimeout(() => setShareMessage(''), 3000);
     }
   };
@@ -65,7 +78,7 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
 
         <div className="bounce-in" style={{
           backgroundColor: cardColor, border: '1px solid ' + borderColor,
-          borderRadius: '20px', padding: '24px', textAlign: 'center', marginBottom: '24px'
+          borderRadius: '20px', padding: '24px', textAlign: 'center', marginBottom: '16px'
         }}>
           <div style={{
             width: '80px', height: '80px', backgroundColor: '#e85d04',
@@ -95,6 +108,95 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
           </div>
         </div>
 
+        <div style={{
+          backgroundColor: 'linear-gradient(135deg, #e85d04, #ff6b6b)',
+          background: 'linear-gradient(135deg, #e85d04, #ff4500)',
+          borderRadius: '20px', padding: '20px', marginBottom: '16px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <div>
+              <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '16px' }}>🌟 Loyalty Points</p>
+              <p style={{ color: 'rgba(255,255,255,0.8)', margin: '4px 0 0', fontSize: '13px' }}>
+                Earn 1 point for every Rs. 10 spent!
+              </p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <h2 style={{ color: 'white', margin: 0, fontSize: '32px', fontWeight: 'bold' }}>{points}</h2>
+              <p style={{ color: 'rgba(255,255,255,0.8)', margin: 0, fontSize: '12px' }}>points</p>
+            </div>
+          </div>
+
+          <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '10px', height: '8px', marginBottom: '8px' }}>
+            <div style={{
+              backgroundColor: 'white', height: '100%',
+              width: ((points % 100) + '%'),
+              borderRadius: '10px', transition: 'width 0.5s ease'
+            }}></div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <p style={{ color: 'rgba(255,255,255,0.8)', margin: 0, fontSize: '12px' }}>
+              {pointsToNextReward} points to next reward
+            </p>
+            <p style={{ color: 'white', margin: 0, fontSize: '12px', fontWeight: 'bold' }}>
+              {rewards} rewards earned
+            </p>
+          </div>
+
+          {rewards > 0 && (
+            <div style={{
+              backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '12px',
+              padding: '12px', marginTop: '12px', textAlign: 'center'
+            }}>
+              <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '14px' }}>
+                🎉 You have {rewards} reward(s)! Use code FOOD50 for Rs. 50 off!
+              </p>
+            </div>
+          )}
+        </div>
+
+        {referralCode && (
+          <div style={{
+            backgroundColor: cardColor, border: '1px solid ' + borderColor,
+            borderRadius: '16px', padding: '20px', marginBottom: '16px'
+          }}>
+            <p style={{ color: textColor, fontWeight: 'bold', margin: '0 0 8px', fontSize: '15px' }}>
+              🎁 Your Referral Code
+            </p>
+            <p style={{ color: subtextColor, margin: '0 0 12px', fontSize: '13px' }}>
+              Share your code and earn 50 points when friends sign up!
+            </p>
+            <div style={{
+              backgroundColor: theme ? theme.input : '#2a2a2a',
+              borderRadius: '10px', padding: '12px 16px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              marginBottom: '12px'
+            }}>
+              <p style={{ color: '#e85d04', fontWeight: 'bold', margin: 0, fontSize: '18px', letterSpacing: '2px' }}>
+                {referralCode}
+              </p>
+              <button onClick={() => {
+                navigator.clipboard.writeText(referralCode);
+                setShareMessage('Code copied!');
+                setTimeout(() => setShareMessage(''), 2000);
+              }} style={{
+                backgroundColor: '#e85d04', color: 'white', border: 'none',
+                padding: '6px 12px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px'
+              }}>Copy</button>
+            </div>
+            {shareMessage && (
+              <p style={{ color: '#2ecc71', fontSize: '13px', margin: '0 0 8px', textAlign: 'center' }}>
+                ✓ {shareMessage}
+              </p>
+            )}
+            <button onClick={handleShare} style={{
+              width: '100%', padding: '12px', backgroundColor: '#e85d04',
+              color: 'white', border: 'none', borderRadius: '10px',
+              fontSize: '14px', fontWeight: 'bold', cursor: 'pointer'
+            }}>Share & Earn 50 Points</button>
+          </div>
+        )}
+
         <div onClick={onFavorites} style={{
           backgroundColor: cardColor, border: '1px solid ' + borderColor,
           borderRadius: '16px', padding: '20px', marginBottom: '12px',
@@ -111,8 +213,7 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
               backgroundColor: '#ff4d4d', color: 'white',
-              padding: '4px 12px', borderRadius: '20px',
-              fontSize: '13px', fontWeight: 'bold'
+              padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold'
             }}>{favoritesCount}</div>
             <span style={{ color: subtextColor, fontSize: '18px' }}>›</span>
           </div>
@@ -134,8 +235,7 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
               backgroundColor: '#e85d04', color: 'white',
-              padding: '4px 12px', borderRadius: '20px',
-              fontSize: '13px', fontWeight: 'bold'
+              padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold'
             }}>{followedCount}</div>
             <span style={{ color: subtextColor, fontSize: '18px' }}>›</span>
           </div>
@@ -143,7 +243,7 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
 
         <div style={{
           backgroundColor: cardColor, border: '1px solid ' + borderColor,
-          borderRadius: '16px', padding: '20px', marginBottom: '12px',
+          borderRadius: '16px', padding: '20px', marginBottom: '16px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -162,32 +262,6 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
           }}>
             {darkMode ? 'Dark' : 'Light'}
           </button>
-        </div>
-
-        {shareMessage && (
-          <div className="fade-in" style={{
-            backgroundColor: '#1a2a1a', border: '1px solid #2ecc71',
-            borderRadius: '12px', padding: '12px', marginBottom: '16px',
-            color: '#2ecc71', textAlign: 'center', fontSize: '14px', fontWeight: 'bold'
-          }}>{shareMessage}</div>
-        )}
-
-        <div style={{
-          backgroundColor: cardColor, border: '1px solid ' + borderColor,
-          borderRadius: '16px', padding: '20px', marginBottom: '24px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-            <div style={{ fontSize: '24px' }}>🔗</div>
-            <div>
-              <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>Share FoodReels</p>
-              <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>Share with your friends!</p>
-            </div>
-          </div>
-          <button onClick={handleShare} style={{
-            width: '100%', padding: '14px', backgroundColor: '#e85d04',
-            color: 'white', border: 'none', borderRadius: '10px',
-            fontSize: '15px', fontWeight: 'bold', cursor: 'pointer'
-          }}>Share FoodReels App</button>
         </div>
 
         <h3 style={{ color: textColor, marginBottom: '16px', fontSize: '16px' }}>Order History</h3>
@@ -209,7 +283,9 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
             borderRadius: '16px', padding: '40px', textAlign: 'center'
           }}>
             <p style={{ color: subtextColor, margin: 0 }}>No orders yet!</p>
-            <p style={{ color: subtextColor, margin: '8px 0 0', fontSize: '14px' }}>Start ordering from the Feed</p>
+            <p style={{ color: subtextColor, margin: '8px 0 0', fontSize: '14px' }}>
+              Start ordering to earn loyalty points!
+            </p>
           </div>
         )}
 
@@ -222,7 +298,9 @@ function Profile({ onLogout, userEmail, onBack, theme, darkMode, toggleDarkMode,
             <div>
               <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{order.dish}</p>
               <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>{order.restaurant}</p>
-              <p style={{ color: subtextColor, margin: '2px 0 0', fontSize: '12px' }}>{order.status}</p>
+              <p style={{ color: '#f39c12', margin: '2px 0 0', fontSize: '12px' }}>
+                +{order.pointsEarned || Math.floor(order.price / 10)} points earned
+              </p>
             </div>
             <p style={{ color: '#2ecc71', fontWeight: 'bold', margin: 0 }}>Rs. {order.price}</p>
           </div>
