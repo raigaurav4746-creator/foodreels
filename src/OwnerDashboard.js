@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Logo from './Logo';
 
 function OwnerDashboard({ onLogout, theme, ownerEmail }) {
@@ -16,6 +16,11 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [refreshing, setRefreshing] = useState(false);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoPreview, setVideoPreview] = useState('');
+  const fileInputRef = useRef(null);
 
   const bgColor = theme ? theme.bg : '#0a0a0a';
   const cardColor = theme ? theme.card : '#1a1a1a';
@@ -68,24 +73,64 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
+  const handleVideoSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setVideoFile(file);
+      setVideoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadVideoToCloudinary = async () => {
+    if (!videoFile) return null;
+    setVideoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', videoFile);
+      formData.append('upload_preset', 'foodreels_upload');
+      formData.append('cloud_name', 'dwre7diyg');
+
+      const response = await fetch(
+        'https://api.cloudinary.com/v1_1/dwre7diyg/video/upload',
+        { method: 'POST', body: formData }
+      );
+      const data = await response.json();
+      setVideoUploading(false);
+      return data.secure_url;
+    } catch (err) {
+      console.log(err);
+      setVideoUploading(false);
+      return null;
+    }
+  };
+
   const handleUpload = async () => {
     if (!dish || !price || !restaurant) {
       setMessage('Please fill in Restaurant Name, Dish Name and Price!');
       return;
     }
+
+    let uploadedVideoUrl = videoUrl;
+    if (videoFile) {
+      setMessage('Uploading video...');
+      uploadedVideoUrl = await uploadVideoToCloudinary();
+      if (!uploadedVideoUrl) {
+        setMessage('Video upload failed! Adding dish without video.');
+        uploadedVideoUrl = '';
+      }
+    }
+
     try {
       const response = await fetch('https://foodreels-backend.onrender.com/reels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          restaurant,
-          dish,
+          restaurant, dish,
           price: parseInt(price),
           color,
-          openTime,
-          closeTime,
-          deliveryTime,
-          minOrder: parseInt(minOrder)
+          openTime, closeTime, deliveryTime,
+          minOrder: parseInt(minOrder),
+          videoUrl: uploadedVideoUrl
         })
       });
       const data = await response.json();
@@ -93,6 +138,9 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
         setMessage('Dish added to FoodReels successfully!');
         setDish('');
         setPrice('');
+        setVideoFile(null);
+        setVideoPreview('');
+        setVideoUrl('');
         fetchData();
         setTimeout(() => setMessage(''), 3000);
       } else {
@@ -227,9 +275,6 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 borderRadius: '16px', padding: '40px', textAlign: 'center'
               }}>
                 <p style={{ color: subtextColor, margin: 0 }}>No orders yet!</p>
-                <p style={{ color: subtextColor, margin: '8px 0 0', fontSize: '14px' }}>
-                  Orders appear here when customers order
-                </p>
               </div>
             )}
             {orders.map((order, index) => (
@@ -241,15 +286,9 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '15px' }}>{order.dish}</p>
-                    <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>
-                      Customer: {order.customer}
-                    </p>
-                    <p style={{ color: subtextColor, margin: '2px 0 0', fontSize: '12px' }}>
-                      Restaurant: {order.restaurant || 'N/A'}
-                    </p>
-                    <p style={{ color: subtextColor, margin: '2px 0 0', fontSize: '11px' }}>
-                      {new Date(order.createdAt).toLocaleString()}
-                    </p>
+                    <p style={{ color: subtextColor, margin: '4px 0 0', fontSize: '13px' }}>Customer: {order.customer}</p>
+                    <p style={{ color: subtextColor, margin: '2px 0 0', fontSize: '12px' }}>Restaurant: {order.restaurant || 'N/A'}</p>
+                    <p style={{ color: subtextColor, margin: '2px 0 0', fontSize: '11px' }}>{new Date(order.createdAt).toLocaleString()}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ color: '#2ecc71', fontWeight: 'bold', margin: 0 }}>Rs. {order.price}</p>
@@ -263,9 +302,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
 
         {activeTab === 'menu' && (
           <div className="fade-in">
-            <h3 style={{ color: textColor, marginBottom: '16px', fontSize: '16px' }}>
-              All Menu Items ({reels.length})
-            </h3>
+            <h3 style={{ color: textColor, marginBottom: '16px', fontSize: '16px' }}>All Menu Items ({reels.length})</h3>
             {reels.map((reel, index) => (
               <div key={index} className="slide-in" style={{
                 backgroundColor: cardColor, border: '1px solid ' + borderColor,
@@ -283,7 +320,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                     <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
                       <span style={{ color: subtextColor, fontSize: '11px' }}>🕐 {reel.openTime} - {reel.closeTime}</span>
                       <span style={{ color: subtextColor, fontSize: '11px' }}>🛵 {reel.deliveryTime}</span>
-                      <span style={{ color: subtextColor, fontSize: '11px' }}>🛒 Min Rs.{reel.minOrder}</span>
+                      {reel.videoUrl && <span style={{ color: '#2ecc71', fontSize: '11px' }}>🎬 Has Video</span>}
                     </div>
                   </div>
                   <p style={{ color: '#2ecc71', fontWeight: 'bold', margin: 0 }}>Rs. {reel.price}</p>
@@ -315,7 +352,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
               )}
 
               <input
-                placeholder="Your Restaurant Name (e.g. Gaurav's Kitchen)"
+                placeholder="Your Restaurant Name"
                 value={restaurant}
                 onChange={(e) => setRestaurant(e.target.value)}
                 style={{
@@ -325,7 +362,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 }}
               />
               <input
-                placeholder="Dish Name (e.g. Special Biryani)"
+                placeholder="Dish Name"
                 value={dish}
                 onChange={(e) => setDish(e.target.value)}
                 style={{
@@ -335,7 +372,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 }}
               />
               <input
-                placeholder="Price in Rs. (e.g. 250)"
+                placeholder="Price in Rs."
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 type="number"
@@ -346,7 +383,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 }}
               />
               <input
-                placeholder="Minimum Order Rs. (e.g. 99)"
+                placeholder="Minimum Order Rs."
                 value={minOrder}
                 onChange={(e) => setMinOrder(e.target.value)}
                 type="number"
@@ -361,8 +398,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 <div style={{ flex: 1 }}>
                   <p style={{ color: subtextColor, margin: '0 0 6px', fontSize: '12px' }}>Opening Time:</p>
                   <input
-                    type="time"
-                    value={openTime}
+                    type="time" value={openTime}
                     onChange={(e) => setOpenTime(e.target.value)}
                     style={{
                       width: '100%', padding: '12px', borderRadius: '10px',
@@ -374,8 +410,7 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 <div style={{ flex: 1 }}>
                   <p style={{ color: subtextColor, margin: '0 0 6px', fontSize: '12px' }}>Closing Time:</p>
                   <input
-                    type="time"
-                    value={closeTime}
+                    type="time" value={closeTime}
                     onChange={(e) => setCloseTime(e.target.value)}
                     style={{
                       width: '100%', padding: '12px', borderRadius: '10px',
@@ -414,29 +449,51 @@ function OwnerDashboard({ onLogout, theme, ownerEmail }) {
                 backgroundColor: theme ? theme.input : '#2a2a2a',
                 borderRadius: '12px', padding: '16px', marginBottom: '16px'
               }}>
-                <p style={{ color: subtextColor, margin: '0 0 8px', fontSize: '12px' }}>Preview:</p>
-                <div style={{ backgroundColor: color, borderRadius: '10px', padding: '20px', textAlign: 'center' }}>
-                  <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
-                    {dish || 'Dish Name'}
-                  </p>
-                  <p style={{ color: 'white', margin: '4px 0 0', fontSize: '14px' }}>
-                    {restaurant || 'Restaurant Name'}
-                  </p>
-                  <p style={{ color: 'white', margin: '4px 0 0', fontWeight: 'bold' }}>
-                    Rs. {price || '0'}
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
-                    <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px' }}>🕐 {openTime}-{closeTime}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px' }}>🛵 {deliveryTime}</span>
-                  </div>
-                </div>
+                <p style={{ color: textColor, fontWeight: 'bold', margin: '0 0 8px', fontSize: '14px' }}>
+                  🎬 Upload Food Video (Optional)
+                </p>
+                <p style={{ color: subtextColor, margin: '0 0 12px', fontSize: '12px' }}>
+                  Add a short video to make your dish more attractive!
+                </p>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoSelect}
+                  style={{ display: 'none' }}
+                />
+
+                <button onClick={() => fileInputRef.current.click()} style={{
+                  width: '100%', padding: '12px',
+                  backgroundColor: videoFile ? '#1a2a1a' : cardColor,
+                  color: videoFile ? '#2ecc71' : subtextColor,
+                  border: '2px dashed ' + (videoFile ? '#2ecc71' : borderColor),
+                  borderRadius: '10px', cursor: 'pointer', fontSize: '14px'
+                }}>
+                  {videoFile ? '✓ ' + videoFile.name : '+ Select Video File'}
+                </button>
+
+                {videoPreview && (
+                  <video
+                    src={videoPreview}
+                    controls
+                    style={{
+                      width: '100%', borderRadius: '10px',
+                      marginTop: '12px', maxHeight: '200px'
+                    }}
+                  />
+                )}
               </div>
 
-              <button onClick={handleUpload} style={{
-                width: '100%', padding: '14px', backgroundColor: '#e85d04',
+              <button onClick={handleUpload} disabled={videoUploading} style={{
+                width: '100%', padding: '14px', backgroundColor: videoUploading ? '#854f0b' : '#e85d04',
                 color: 'white', border: 'none', borderRadius: '10px',
-                fontSize: '15px', fontWeight: 'bold', cursor: 'pointer'
-              }}>Add Dish to FoodReels Home Page</button>
+                fontSize: '15px', fontWeight: 'bold',
+                cursor: videoUploading ? 'not-allowed' : 'pointer'
+              }}>
+                {videoUploading ? 'Uploading Video...' : 'Add Dish to FoodReels'}
+              </button>
             </div>
           </div>
         )}

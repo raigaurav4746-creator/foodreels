@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Logo from './Logo';
 
-function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite, onReviews, theme, followed, toggleFollow }) {
+function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant, favorites, toggleFavorite, onReviews, theme, followed, toggleFollow, onSpin }) {
   const [reels, setReels] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -32,8 +32,12 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
 
   const getRestaurantImage = (restaurant, dishes) => {
     if (restaurantImages[restaurant]) return restaurantImages[restaurant];
-    const firstDish = dishes[0];
     return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';
+  };
+
+  const getRestaurantVideo = (dishes) => {
+    const dishWithVideo = dishes.find(d => d.videoUrl && d.videoUrl !== '');
+    return dishWithVideo ? dishWithVideo.videoUrl : null;
   };
 
   useEffect(() => {
@@ -171,6 +175,23 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
 
         {activeSection === 'offers' && (
           <div className="fade-in">
+            <div style={{
+              backgroundColor: '#f39c12', borderRadius: '20px',
+              padding: '20px', marginBottom: '16px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              cursor: 'pointer'
+            }} onClick={onSpin}>
+              <div>
+                <p style={{ color: 'white', fontWeight: 'bold', margin: 0, fontSize: '18px' }}>
+                  🎰 Spin & Win!
+                </p>
+                <p style={{ color: 'rgba(255,255,255,0.9)', margin: '4px 0 0', fontSize: '14px' }}>
+                  Spin the wheel to win discounts!
+                </p>
+              </div>
+              <div style={{ fontSize: '40px' }}>🎡</div>
+            </div>
+
             <h3 style={{ color: textColor, margin: '0 0 16px', fontSize: '18px' }}>🎁 Today's Offers</h3>
             {offers.map((offer, index) => (
               <div key={index} className="reel-card" style={{
@@ -214,130 +235,152 @@ function Feed({ onLogout, onProfile, onCart, cartCount, addToCart, onRestaurant,
               </div>
             )}
 
-            {filtered.map((restaurant, index) => (
-              <div key={restaurant.name} className="reel-card" style={{
-                borderRadius: '24px', marginBottom: '16px', overflow: 'hidden',
-                backgroundColor: cardColor, border: '1px solid ' + borderColor,
-                animationDelay: index * 0.1 + 's'
-              }}>
-                <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
-                  <img
-                    src={getRestaurantImage(restaurant.name, restaurant.dishes)}
-                    alt={restaurant.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%)'
-                  }}></div>
-
-                  <div style={{ position: 'absolute', top: '16px', left: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <div style={{
-                      backgroundColor: 'rgba(0,0,0,0.6)', color: 'white',
-                      padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold'
-                    }}>{restaurant.name}</div>
-                    <div style={{
-                      backgroundColor: '#e85d04', color: 'white',
-                      padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold'
-                    }}>{restaurant.dishes.length} dishes</div>
-                  </div>
-
-                  <button onClick={() => toggleFollow && toggleFollow(restaurant.name)} style={{
-                    position: 'absolute', top: '12px', right: '16px',
-                    backgroundColor: isFollowed(restaurant.name) ? 'rgba(232,93,4,0.8)' : 'rgba(0,0,0,0.5)',
-                    border: 'none', borderRadius: '20px', padding: '6px 14px',
-                    cursor: 'pointer', color: 'white', fontSize: '13px', fontWeight: 'bold'
-                  }}>
-                    {isFollowed(restaurant.name) ? '✓ Following' : '+ Follow'}
-                  </button>
-
-                  <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px' }}>
-                    <h2 style={{ color: 'white', fontSize: '22px', margin: '0 0 4px' }}>{restaurant.name}</h2>
-                    <p style={{ color: 'white', fontSize: '14px', margin: 0, opacity: 0.9 }}>
-                      Rs. {restaurant.minPrice} - Rs. {restaurant.maxPrice}
-                    </p>
-                  </div>
-                </div>
-
-                <div style={{ padding: '16px 20px' }}>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
-                    {restaurant.dishes.slice(0, 3).map((dish, i) => (
-                      <span key={i} style={{
-                        backgroundColor: theme ? theme.input : '#2a2a2a',
-                        color: subtextColor, padding: '4px 10px',
-                        borderRadius: '10px', fontSize: '12px'
-                      }}>{dish.dish}</span>
-                    ))}
-                    {restaurant.dishes.length > 3 && (
-                      <span style={{
-                        backgroundColor: '#e85d04', color: 'white',
-                        padding: '4px 10px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold'
-                      }}>+{restaurant.dishes.length - 3} more</span>
+            {filtered.map((restaurant, index) => {
+              const videoUrl = getRestaurantVideo(restaurant.dishes);
+              return (
+                <div key={restaurant.name} className="reel-card" style={{
+                  borderRadius: '24px', marginBottom: '16px', overflow: 'hidden',
+                  backgroundColor: cardColor, border: '1px solid ' + borderColor,
+                  animationDelay: index * 0.1 + 's'
+                }}>
+                  <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
+                    {videoUrl ? (
+                      <video
+                        src={videoUrl}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <img
+                        src={getRestaurantImage(restaurant.name, restaurant.dishes)}
+                        alt={restaurant.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
                     )}
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                      background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%)'
+                    }}></div>
+
+                    {videoUrl && (
+                      <div style={{
+                        position: 'absolute', top: '16px', left: '16px',
+                        backgroundColor: 'rgba(232,93,4,0.9)', color: 'white',
+                        padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold'
+                      }}>🎬 Video</div>
+                    )}
+
+                    <div style={{ position: 'absolute', top: '16px', left: videoUrl ? '80px' : '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <div style={{
+                        backgroundColor: 'rgba(0,0,0,0.6)', color: 'white',
+                        padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold'
+                      }}>{restaurant.name}</div>
+                      <div style={{
+                        backgroundColor: '#e85d04', color: 'white',
+                        padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold'
+                      }}>{restaurant.dishes.length} dishes</div>
+                    </div>
+
+                    <button onClick={() => toggleFollow && toggleFollow(restaurant.name)} style={{
+                      position: 'absolute', top: '12px', right: '16px',
+                      backgroundColor: isFollowed(restaurant.name) ? 'rgba(232,93,4,0.8)' : 'rgba(0,0,0,0.5)',
+                      border: 'none', borderRadius: '20px', padding: '6px 14px',
+                      cursor: 'pointer', color: 'white', fontSize: '13px', fontWeight: 'bold'
+                    }}>
+                      {isFollowed(restaurant.name) ? '✓ Following' : '+ Follow'}
+                    </button>
+
+                    <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px' }}>
+                      <h2 style={{ color: 'white', fontSize: '22px', margin: '0 0 4px' }}>{restaurant.name}</h2>
+                      <p style={{ color: 'white', fontSize: '14px', margin: 0, opacity: 0.9 }}>
+                        Rs. {restaurant.minPrice} - Rs. {restaurant.maxPrice}
+                      </p>
+                    </div>
                   </div>
 
-                  <button
-                    onClick={() => setExpandedCard(expandedCard === restaurant.name ? null : restaurant.name)}
-                    style={{
-                      width: '100%', padding: '10px',
-                      backgroundColor: theme ? theme.input : '#2a2a2a',
-                      color: textColor, border: '1px solid ' + borderColor,
-                      borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
-                      fontWeight: 'bold', marginBottom: '8px'
-                    }}>
-                    {expandedCard === restaurant.name ? '▲ Hide Menu' : '▼ View Full Menu (' + restaurant.dishes.length + ' dishes)'}
-                  </button>
+                  <div style={{ padding: '16px 20px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                      {restaurant.dishes.slice(0, 3).map((dish, i) => (
+                        <span key={i} style={{
+                          backgroundColor: theme ? theme.input : '#2a2a2a',
+                          color: subtextColor, padding: '4px 10px',
+                          borderRadius: '10px', fontSize: '12px'
+                        }}>{dish.dish}</span>
+                      ))}
+                      {restaurant.dishes.length > 3 && (
+                        <span style={{
+                          backgroundColor: '#e85d04', color: 'white',
+                          padding: '4px 10px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold'
+                        }}>+{restaurant.dishes.length - 3} more</span>
+                      )}
+                    </div>
 
-                  {expandedCard === restaurant.name && (
-                    <div className="fade-in">
-                      {restaurant.dishes.map((dish, i) => (
-                        <div key={i} style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          padding: '12px', backgroundColor: theme ? theme.input : '#2a2a2a',
-                          borderRadius: '10px', marginBottom: '8px'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{
-                              width: '36px', height: '36px', backgroundColor: dish.color || '#e85d04',
-                              borderRadius: '8px', flexShrink: 0
-                            }}></div>
-                            <div>
-                              <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '14px' }}>{dish.dish}</p>
-                              <p style={{ color: '#2ecc71', margin: '2px 0 0', fontSize: '13px', fontWeight: 'bold' }}>Rs. {dish.price}</p>
+                    <button
+                      onClick={() => setExpandedCard(expandedCard === restaurant.name ? null : restaurant.name)}
+                      style={{
+                        width: '100%', padding: '10px',
+                        backgroundColor: theme ? theme.input : '#2a2a2a',
+                        color: textColor, border: '1px solid ' + borderColor,
+                        borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
+                        fontWeight: 'bold', marginBottom: '8px'
+                      }}>
+                      {expandedCard === restaurant.name ? '▲ Hide Menu' : '▼ View Full Menu (' + restaurant.dishes.length + ' dishes)'}
+                    </button>
+
+                    {expandedCard === restaurant.name && (
+                      <div className="fade-in">
+                        {restaurant.dishes.map((dish, i) => (
+                          <div key={i} style={{
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            padding: '12px', backgroundColor: theme ? theme.input : '#2a2a2a',
+                            borderRadius: '10px', marginBottom: '8px'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{
+                                width: '36px', height: '36px', backgroundColor: dish.color || '#e85d04',
+                                borderRadius: '8px', flexShrink: 0
+                              }}></div>
+                              <div>
+                                <p style={{ color: textColor, fontWeight: 'bold', margin: 0, fontSize: '14px' }}>{dish.dish}</p>
+                                <p style={{ color: '#2ecc71', margin: '2px 0 0', fontSize: '13px', fontWeight: 'bold' }}>Rs. {dish.price}</p>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <button onClick={() => toggleFavorite && toggleFavorite(dish)} style={{
+                                backgroundColor: isFavorite(dish) ? 'rgba(255,77,77,0.2)' : 'transparent',
+                                border: '1px solid ' + borderColor, borderRadius: '20px',
+                                padding: '6px 10px', cursor: 'pointer',
+                                color: isFavorite(dish) ? '#ff4d4d' : subtextColor, fontSize: '12px'
+                              }}>
+                                {isFavorite(dish) ? '❤️' : '🤍'}
+                              </button>
+                              <button onClick={() => {
+                                addToCart(dish);
+                                setOrdered(dish.dish);
+                                setTimeout(() => setOrdered(null), 2000);
+                              }} style={{
+                                backgroundColor: '#e85d04', color: 'white', border: 'none',
+                                padding: '8px 16px', borderRadius: '20px',
+                                fontSize: '13px', fontWeight: 'bold', cursor: 'pointer'
+                              }}>Add</button>
                             </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <button onClick={() => toggleFavorite && toggleFavorite(dish)} style={{
-                              backgroundColor: isFavorite(dish) ? 'rgba(255,77,77,0.2)' : 'transparent',
-                              border: '1px solid ' + borderColor, borderRadius: '20px',
-                              padding: '6px 10px', cursor: 'pointer',
-                              color: isFavorite(dish) ? '#ff4d4d' : subtextColor, fontSize: '12px'
-                            }}>
-                              {isFavorite(dish) ? '❤️' : '🤍'}
-                            </button>
-                            <button onClick={() => {
-                              addToCart(dish);
-                              setOrdered(dish.dish);
-                              setTimeout(() => setOrdered(null), 2000);
-                            }} style={{
-                              backgroundColor: '#e85d04', color: 'white', border: 'none',
-                              padding: '8px 16px', borderRadius: '20px',
-                              fontSize: '13px', fontWeight: 'bold', cursor: 'pointer'
-                            }}>Add</button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
 
-                  <button onClick={() => onRestaurant(restaurant.name)} style={{
-                    width: '100%', padding: '12px',
-                    backgroundColor: '#e85d04', color: 'white', border: 'none',
-                    borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold'
-                  }}>Visit Restaurant Page</button>
+                    <button onClick={() => onRestaurant(restaurant.name)} style={{
+                      width: '100%', padding: '12px',
+                      backgroundColor: '#e85d04', color: 'white', border: 'none',
+                      borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold'
+                    }}>Visit Restaurant Page</button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </>
         )}
       </div>
